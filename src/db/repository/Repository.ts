@@ -2,6 +2,22 @@ import { injectable } from 'inversify';
 import { Pool } from 'pg';
 import { DatabaseConnector } from '../connector';
 
+enum OrderType {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export interface IQueryFilters {
+  offset?: string;
+  limit?: string;
+  orderBy?: string;
+  orderType?: OrderType;
+}
+
+export interface IQuerySearch {
+  [key: string]: any,
+}
+
 @injectable()
 export abstract class Repository {
   protected readonly connection: Pool;
@@ -16,7 +32,7 @@ export abstract class Repository {
 
   abstract update(): Promise<any>;
 
-  abstract getList(filters: any, options: any): Promise<any[]>;
+  abstract getList(filters: any, options: any): Promise<any>;
 
   abstract getById(id: number): Promise<any>;
 
@@ -40,5 +56,34 @@ export abstract class Repository {
 
   private buildKeysQueryPart(keys: any[]) {
     return keys.reduce((summ, current) => (summ ? `${summ}, ${current}` : `${current}`), '');
+  }
+
+  protected processFilters(filters: IQueryFilters) {
+    const { offset, limit, orderBy, orderType } = filters;
+    const filterQueries: string[] = [];
+
+    if (orderBy) {
+      filterQueries.push(`ORDER BY ${orderBy} ${orderType || OrderType.ASC}`);
+    }
+
+    if (limit) {
+      filterQueries.push(`LIMIT ${limit}`);
+    }
+
+    if (offset) {
+      filterQueries.push(`OFFSET ${offset}`);
+    }
+
+    return filterQueries.join(' ');
+  }
+
+  protected processSearch(search: IQuerySearch) {
+    const searchQueries: string[] = [];
+
+    Object.entries(search).forEach(([field, value]) => {
+      searchQueries.push(`${field} = ${value}`);
+    });
+
+    return searchQueries.join(' ');
   }
 }

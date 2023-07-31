@@ -10,8 +10,17 @@ export class UserController {
   constructor(@inject(TYPE.UserRepository) private readonly repository: UserRepository) {}
 
   @httpGet('/')
-  list(req: Request, res: Response, next: NextFunction) {
-    return res.send('list');
+  async list(req: Request, res: Response, next: NextFunction) {
+    try {
+      const filters = req.query;
+      const search = {};
+
+      const users = await this.repository.getList(filters, search);
+      return res.send(users);
+    } catch (error) {
+      console.log('Get Users List Error: ', error);
+      return next(error);
+    }
   }
 
   @httpGet('/:id')
@@ -24,9 +33,9 @@ export class UserController {
     try {
       const user = await this.repository.create(req.body);
       return res.send(user);
-    } catch (error: any) {
-      console.log(error);
-      return res.send({ error });
+    } catch (error) {
+      console.log('Create User Error: ', error);
+      return next(error);
     }
   }
 

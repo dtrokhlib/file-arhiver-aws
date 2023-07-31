@@ -5,12 +5,12 @@ import express, { Application } from 'express';
 // import { Storage } from './connectors/StorageConnector';
 import { Container } from 'inversify';
 import { buildProviderModule } from 'inversify-binding-decorators';
-import { Config } from './config';
 
 import './api/v1/controllers/StorageController';
 import './api/v1/controllers/UserController';
 import { errorHandler } from './errors/ErrorHandler';
 import { bindings } from './inversify.config';
+import { ConfigService } from './config';
 
 // const s3Client = new S3Client(Config.awsCredentials);
 // const storage = new Storage(Config.s3.bucket, s3Client);
@@ -22,7 +22,11 @@ class Server {
 
   private readonly server: InversifyExpressServer;
 
+  private readonly config: ConfigService;
+
   constructor() {
+    this.config = new ConfigService();
+
     this.container = new Container();
     this.container.load(buildProviderModule());
     this.setupMiddleware();
@@ -36,9 +40,10 @@ class Server {
     this.setupErrorHandler();
   }
 
-  listen(port: number) {
+  listen() {
+    const { port = 3000 } = this.config.getByKey('application');
     this.app.listen(port);
-    console.log(`Server running on port: ${Config.application.port}`);
+    console.log(`Server running on port: ${this.config.getByKey('application').port}`);
   }
 
   setupApplication(app: Application) {
@@ -54,4 +59,4 @@ class Server {
 }
 
 const server = new Server();
-server.listen(Config.application.port);
+server.listen();

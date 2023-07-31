@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { CreateUserDto } from 'src/models/CreateUserDto';
-import { Repository } from './Repository';
+import { IQueryFilters, Repository } from './Repository';
 import TYPE from '../../constants/types';
 import { DatabaseConnector } from '../connector';
 
@@ -29,8 +29,10 @@ export class UserRepository extends Repository {
     });
   }
 
-  async getList(filters: any, options: any) {
-    return [];
+  async getList(filters: IQueryFilters, search: any) {
+    return this.connection
+      .query(`SELECT * FROM ${this.table} ${this.processFilters(filters)}`)
+      .then(users => users.rows);
   }
 
   getById(id: number) {
