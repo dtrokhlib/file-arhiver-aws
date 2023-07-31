@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+.vscode
+local-test.js
+jest.config.js
+package*.json
