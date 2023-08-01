@@ -1,19 +1,24 @@
 import { inject } from 'inversify';
 import { NextFunction, Request, Response } from 'express';
 import { controller, httpDelete, httpGet, httpPost, httpPut } from 'inversify-express-utils';
-import { UserRepository } from '../../../db/repository/UserRepositroy';
+import { UserRepository } from '../../../db/repository/UserRepository';
 import { CreateUserValidator } from '../middlewares/CreateUserValidator';
 import TYPE from '../../../constants/types';
+import { BaseController } from './BaseController';
+import { IQuery } from '../../../interfaces/api/IQuery';
 
 @controller('/api/v1/user')
-export class UserController {
-  constructor(@inject(TYPE.UserRepository) private readonly repository: UserRepository) {}
+export class UserController extends BaseController {
+  constructor(@inject(TYPE.UserRepository) private readonly repository: UserRepository) {
+    super();
+  }
 
   @httpGet('/')
   async list(req: Request, res: Response, next: NextFunction) {
     try {
-      const filters = req.query;
-      const search = {};
+      const queries = req.query as IQuery;
+      const filters = this.getFilters(queries);
+      const search = this.getSearch(queries);
 
       const users = await this.repository.getList(filters, search);
       return res.send(users);

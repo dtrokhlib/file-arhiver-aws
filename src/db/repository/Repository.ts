@@ -1,22 +1,8 @@
 import { injectable } from 'inversify';
 import { Pool } from 'pg';
 import { DatabaseConnector } from '../connector';
-
-enum OrderType {
-  ASC = 'ASC',
-  DESC = 'DESC',
-}
-
-export interface IQueryFilters {
-  offset?: string;
-  limit?: string;
-  orderBy?: string;
-  orderType?: OrderType;
-}
-
-export interface IQuerySearch {
-  [key: string]: any,
-}
+import { IQueryFilters, IQuerySearch } from '../../interfaces/api/IQuery';
+import { OrderType } from '../../interfaces/db/OrderType';
 
 @injectable()
 export abstract class Repository {
@@ -36,16 +22,16 @@ export abstract class Repository {
 
   abstract getById(id: number): Promise<any>;
 
-  protected queryBuilder(table: string, object: any) {
-    const values = Object.values(object);
-    const keys = Object.keys(object);
-    const valuesEnum = this.buildEnumQueryPart(values);
-    const keysEnum = this.buildKeysQueryPart(keys);
+  // protected queryBuilder(table: string, object: any) {
+  //   const values = Object.values(object);
+  //   const keys = Object.keys(object);
+  //   const valuesEnum = this.buildEnumQueryPart(values);
+  //   const keysEnum = this.buildKeysQueryPart(keys);
 
-    const query = `INSERT INTO ${table} (${keysEnum}) values (${valuesEnum}) RETURNING *`;
+  //   const query = `INSERT INTO ${table} (${keysEnum}) values (${valuesEnum}) RETURNING *`;
 
-    return { query, values };
-  }
+  //   return { query, values };
+  // }
 
   private buildEnumQueryPart(values: any[]) {
     return values.reduce((summ, current, index) => {
