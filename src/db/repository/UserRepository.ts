@@ -7,6 +7,7 @@ import { IQueryFilters, IQuerySearch } from '../../interfaces/api/IQuery';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { QueryType } from '../../interfaces/db/QueryType';
 import { IQueryOptions } from '../../interfaces/db/QueryOptions';
+import { HttpError } from '../../errors/types/HttpError';
 
 @injectable()
 export class UserRepository extends Repository {
@@ -20,15 +21,25 @@ export class UserRepository extends Repository {
   }
 
   create(user: CreateUserDto) {
-    // const { query, values } = this.queryBuilder(this.table, user);
-    // return this.connection.query(query, values);
-    return {};
+    const queryOptions: IQueryOptions = {
+      table: this.table,
+      type: QueryType.INSERT,
+      payload: user,
+    };
+
+    const values = Object.values(user);
+    const queryString = this.queryBuilder.buildQuery(queryOptions);
+    return this.connection.query(queryString, values);
   }
 
-  delete() {
-    return new Promise((res, rej) => {
-      res(1);
-    });
+  async delete(id: string) {
+    const queryOptions: IQueryOptions = {
+      table: this.table,
+      type: QueryType.DELETE,
+      search: { id },
+    };
+    const queryString = this.queryBuilder.buildQuery(queryOptions);
+    return this.connection.query(queryString);
   }
 
   update() {
@@ -37,7 +48,7 @@ export class UserRepository extends Repository {
     });
   }
 
-  async getList(filters: IQueryFilters, search: IQuerySearch) {
+  getList(filters: IQueryFilters, search: IQuerySearch) {
     const queryOptions: IQueryOptions = {
       table: this.table,
       type: QueryType.SELECT,
@@ -48,9 +59,20 @@ export class UserRepository extends Repository {
     return this.connection.query(queryString).then(users => users.rows);
   }
 
-  getById(id: number) {
-    return new Promise((res, rej) => {
-      res(1);
-    });
+  async getById(id: string) {
+    const queryOptions: IQueryOptions = {
+      table: this.table,
+      type: QueryType.SELECT,
+      search: { id },
+    };
+
+    const queryString = this.queryBuilder.buildQuery(queryOptions);
+    const [user] = await this.connection.query(queryString).then(users => users.rows);
+
+    if (!user) {
+      throw new HttpError('User not found', 404);
+    }
+
+    return user;
   }
 }

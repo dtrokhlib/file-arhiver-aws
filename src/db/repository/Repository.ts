@@ -14,13 +14,13 @@ export abstract class Repository {
 
   abstract create(entity: any): any;
 
-  abstract delete(): Promise<any>;
+  abstract delete(id: string): Promise<any>;
 
   abstract update(): Promise<any>;
 
   abstract getList(filters: any, options: any): Promise<any>;
 
-  abstract getById(id: number): Promise<any>;
+  abstract getById(id: string): Promise<any>;
 
   // protected queryBuilder(table: string, object: any) {
   //   const values = Object.values(object);
@@ -33,16 +33,16 @@ export abstract class Repository {
   //   return { query, values };
   // }
 
-  private buildEnumQueryPart(values: any[]) {
-    return values.reduce((summ, current, index) => {
-      const order = index + 1;
-      return summ ? `${summ}, $${order}` : `$${order}`;
-    }, '');
-  }
+  // private buildEnumQueryPart(values: any[]) {
+  //   return values.reduce((summ, current, index) => {
+  //     const order = index + 1;
+  //     return summ ? `${summ}, $${order}` : `$${order}`;
+  //   }, '');
+  // }
 
-  private buildKeysQueryPart(keys: any[]) {
-    return keys.reduce((summ, current) => (summ ? `${summ}, ${current}` : `${current}`), '');
-  }
+  // private buildKeysQueryPart(keys: any[]) {
+  //   return keys.reduce((summ, current) => (summ ? `${summ}, ${current}` : `${current}`), '');
+  // }
 
   protected processFilters(filters: IQueryFilters) {
     const { offset, limit, orderBy, orderType } = filters;

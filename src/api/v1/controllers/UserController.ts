@@ -19,38 +19,40 @@ export class UserController extends BaseController {
       const queries = req.query as IQuery;
       const filters = this.getFilters(queries);
       const search = this.getSearch(queries);
-
       const users = await this.repository.getList(filters, search);
-      return res.send(users);
+      res.json(users);
     } catch (error) {
-      console.log('Get Users List Error: ', error);
-      return next(error);
+      next(error);
     }
   }
 
   @httpGet('/:id')
-  getById(req: Request, res: Response, next: NextFunction) {
-    return res.send('get be id');
+  async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await this.repository.getById(req.params.id);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
   }
 
   @httpPost('/', CreateUserValidator)
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const user = await this.repository.create(req.body);
-      return res.send(user);
-    } catch (error) {
-      console.log('Create User Error: ', error);
-      return next(error);
-    }
+  create({ body }: Request, res: Response, next: NextFunction) {
+    return this.repository.create(body).then(res.json).catch(next);
   }
 
   @httpPut('/:id')
   updateById(req: Request, res: Response, next: NextFunction) {
-    return res.send('update by id');
+    res.send('update by id');
   }
 
   @httpDelete('/:id')
-  deleteById(req: Request, res: Response, next: NextFunction) {
-    return res.send('delete by id');
+  async deleteById(req: Request, res: Response, next: NextFunction) {
+    try {
+      await this.repository.delete(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
   }
 }

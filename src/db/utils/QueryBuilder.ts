@@ -10,24 +10,59 @@ export class QueryBuilder {
     switch (options.type) {
       case QueryType.SELECT:
         return this.createSelectQuery(options);
+      case QueryType.INSERT:
+        return this.createInsertQuery(options);
+      case QueryType.DELETE:
+        return this.createDeleteQuery(options);
       default:
         return '';
     }
   }
 
   private createSelectQuery(options: IQueryOptions) {
-    const { table, filters, search } = options;
-    let query = `SELECT * FROM ${table}`;
+    const { table } = options;
+    const query = this.assignFiltersAndSearch(`SELECT * FROM ${table}`, options);
+    return query;
+  }
+
+  private assignFiltersAndSearch(query: string, { search, filters }: IQueryOptions) {
+    let updatedQuery = query;
 
     if (search) {
-      query = query.concat(' ', this.processSearch(search));
+      updatedQuery = updatedQuery.concat(' ', this.processSearch(search));
     }
 
     if (filters) {
-      query = query.concat(' ', this.processFilters(filters));
+      updatedQuery = updatedQuery.concat(' ', this.processFilters(filters));
     }
 
+    return updatedQuery;
+  }
+
+  private createInsertQuery(options: IQueryOptions) {
+    const { table, payload } = options;
+    const values = Object.values(payload);
+    const keys = Object.keys(payload);
+    const joinedFieldValues = this.processFieldValues(values);
+    const joinedFieldKeys = this.processFieldKeys(keys);
+
+    const query = `INSERT INTO ${table} (${joinedFieldKeys}) values (${joinedFieldValues}) RETURNING *`;
     return query;
+  }
+
+  private createDeleteQuery(options: IQueryOptions) {
+    const { table } = options;
+    const query = this.assignFiltersAndSearch(`DELETE FROM ${table}`, options);
+    return query;
+  }
+
+  private processFieldValues(values: any[]) {
+    const indexEnum = Array.from(values, (x, index) => index + 1);
+    return `$${indexEnum.join(', $')}`;
+  }
+
+  private processFieldKeys(keys: any[]) {
+    return keys.join(', ');
   }
 
   private processFilters(filters: IQueryFilters) {
