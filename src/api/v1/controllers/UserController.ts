@@ -16,7 +16,7 @@ export class UserController extends BaseController {
   @httpGet('/')
   async list(req: Request, res: Response, next: NextFunction) {
     try {
-      const queries = req.query as IQuery;
+      const queries = { ...req.query, is_deleted: false } as IQuery;
       const filters = this.getFilters(queries);
       const search = this.getSearch(queries);
       const users = await this.repository.getList(filters, search);
@@ -37,21 +37,33 @@ export class UserController extends BaseController {
   }
 
   @httpPost('/', CreateUserValidator)
-  create({ body }: Request, res: Response, next: NextFunction) {
-    return this.repository.create(body).then(res.json).catch(next);
+  async create({ body }: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await this.repository.create(body);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
   }
 
-  @httpPut('/:id')
-  updateById(req: Request, res: Response, next: NextFunction) {
-    res.send('update by id');
+  @httpPut('/:id', CreateUserValidator)
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await this.repository.update(req.params.id, req.body);
+      res.json(user);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   }
 
   @httpDelete('/:id')
-  async deleteById(req: Request, res: Response, next: NextFunction) {
+  async delete(req: Request, res: Response, next: NextFunction) {
     try {
       await this.repository.delete(req.params.id);
-      res.status(204).send();
+      res.send();
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }

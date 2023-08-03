@@ -8,14 +8,14 @@ import { QueryType } from '../../interfaces/db/QueryType';
 export class QueryBuilder {
   public buildQuery(options: IQueryOptions) {
     switch (options.type) {
-      case QueryType.SELECT:
-        return this.createSelectQuery(options);
       case QueryType.INSERT:
         return this.createInsertQuery(options);
       case QueryType.DELETE:
         return this.createDeleteQuery(options);
+      case QueryType.UPDATE:
+        return this.createUpdateQuery(options);
       default:
-        return '';
+        return this.createSelectQuery(options);
     }
   }
 
@@ -54,6 +54,19 @@ export class QueryBuilder {
     const { table } = options;
     const query = this.assignFiltersAndSearch(`DELETE FROM ${table}`, options);
     return query;
+  }
+
+  private createUpdateQuery(options: IQueryOptions) {
+    const { table, payload } = options;
+    const keys = Object.keys(payload);
+    const keyIndexPairs = this.createKeyIndexPairs(keys);
+    const query = `${this.assignFiltersAndSearch(`UPDATE ${table} SET ${keyIndexPairs}`, options)} RETURNING *`;
+    return query;
+  }
+
+  private createKeyIndexPairs(keys: string[]): string {
+    const listOfPairs = Array.from(keys, (key, index) => `${key} = $${index + 1}`);
+    return listOfPairs.join(', ');
   }
 
   private processFieldValues(values: any[]) {

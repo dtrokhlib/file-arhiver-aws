@@ -20,7 +20,7 @@ export class UserRepository extends Repository {
     super(dbConnector);
   }
 
-  create(user: CreateUserDto) {
+  async create(user: CreateUserDto) {
     const queryOptions: IQueryOptions = {
       table: this.table,
       type: QueryType.INSERT,
@@ -29,23 +29,40 @@ export class UserRepository extends Repository {
 
     const values = Object.values(user);
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    return this.connection.query(queryString, values);
+    const [createdUser] = await this.connection.query(queryString, values).then(res => res.rows);
+    return createdUser;
   }
 
   async delete(id: string) {
+    const user = await this.getById(id);
+    const payload = { ...user, is_deleted: true };
+    delete payload.id;
+
     const queryOptions: IQueryOptions = {
       table: this.table,
-      type: QueryType.DELETE,
+      type: QueryType.UPDATE,
       search: { id },
+      payload,
     };
+
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    return this.connection.query(queryString);
+    const values = Object.values(payload);
+
+    return this.connection.query(queryString, values);
   }
 
-  update() {
-    return new Promise((res, rej) => {
-      res(1);
-    });
+  async update(id: string, user: CreateUserDto) {
+    const queryOptions: IQueryOptions = {
+      table: this.table,
+      type: QueryType.UPDATE,
+      payload: user,
+      search: { id },
+    };
+
+    const values = Object.values(user);
+    const queryString = this.queryBuilder.buildQuery(queryOptions);
+    const [updatedUser] = await this.connection.query(queryString, values).then(res => res.rows);
+    return updatedUser;
   }
 
   getList(filters: IQueryFilters, search: IQuerySearch) {
@@ -55,8 +72,9 @@ export class UserRepository extends Repository {
       filters,
       search,
     };
+
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    return this.connection.query(queryString).then(users => users.rows);
+    return this.connection.query(queryString).then(res => res.rows);
   }
 
   async getById(id: string) {
@@ -67,7 +85,7 @@ export class UserRepository extends Repository {
     };
 
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    const [user] = await this.connection.query(queryString).then(users => users.rows);
+    const [user] = await this.connection.query(queryString).then(res => res.rows);
 
     if (!user) {
       throw new HttpError('User not found', 404);

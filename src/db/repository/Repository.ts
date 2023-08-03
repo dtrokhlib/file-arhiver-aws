@@ -16,33 +16,11 @@ export abstract class Repository {
 
   abstract delete(id: string): Promise<any>;
 
-  abstract update(): Promise<any>;
+  abstract update(id: string, entity: any): Promise<any>;
 
   abstract getList(filters: any, options: any): Promise<any>;
 
   abstract getById(id: string): Promise<any>;
-
-  // protected queryBuilder(table: string, object: any) {
-  //   const values = Object.values(object);
-  //   const keys = Object.keys(object);
-  //   const valuesEnum = this.buildEnumQueryPart(values);
-  //   const keysEnum = this.buildKeysQueryPart(keys);
-
-  //   const query = `INSERT INTO ${table} (${keysEnum}) values (${valuesEnum}) RETURNING *`;
-
-  //   return { query, values };
-  // }
-
-  // private buildEnumQueryPart(values: any[]) {
-  //   return values.reduce((summ, current, index) => {
-  //     const order = index + 1;
-  //     return summ ? `${summ}, $${order}` : `$${order}`;
-  //   }, '');
-  // }
-
-  // private buildKeysQueryPart(keys: any[]) {
-  //   return keys.reduce((summ, current) => (summ ? `${summ}, ${current}` : `${current}`), '');
-  // }
 
   protected processFilters(filters: IQueryFilters) {
     const { offset, limit, orderBy, orderType } = filters;

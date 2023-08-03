@@ -1,0 +1,8 @@
+ALTER TABLE users 
+ADD COLUMN is_deleted BOOLEAN DEFAULT false;
+
+ALTER TABLE users 
+ADD COLUMN is_disabled BOOLEAN DEFAULT false;
+
+ALTER TABLE files 
+ADD COLUMN is_deleted BOOLEAN DEFAULT false;

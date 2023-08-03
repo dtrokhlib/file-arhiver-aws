@@ -1,7 +1,7 @@
 import { OrderType } from '../db/OrderType';
 
 export interface IQuery {
-  [key: string]: string;
+  [key: string]: string | boolean | number;
 }
 
 export interface IQueryFilters {
