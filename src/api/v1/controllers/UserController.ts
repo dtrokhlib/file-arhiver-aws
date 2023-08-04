@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { controller, httpDelete, httpGet, httpPost, httpPut } from 'inversify-express-utils';
 import { UserRepository } from '../../../db/repository/UserRepository';
 import { CreateUserValidator } from '../middlewares/CreateUserValidator';
-import TYPE from '../../../constants/types';
+import { TYPE } from '../../../constants/types';
 import { BaseController } from './BaseController';
 import { IQuery } from '../../../interfaces/api/IQuery';
 

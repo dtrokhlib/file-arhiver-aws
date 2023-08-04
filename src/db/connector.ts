@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { Pool } from 'pg';
-import TYPE from '../constants/types';
+import { TYPE } from '../constants/types';
 import { ConfigService } from '../config';
 
 @injectable()

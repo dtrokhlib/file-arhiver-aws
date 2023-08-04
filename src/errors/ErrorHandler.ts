@@ -16,5 +16,10 @@ function getMessage(error: any) {
 }
 
 function getCode(error: any) {
-  return error.code || 500;
+  const { code } = error;
+  return isValidStatusCode(code) ? code : 400;
+}
+
+function isValidStatusCode(code: any) {
+  return code && Number(code) > 99 && Number(code) < 600;
 }
