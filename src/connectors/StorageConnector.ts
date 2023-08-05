@@ -1,36 +1,65 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
+import { inject, injectable } from 'inversify';
+import { TYPE } from '../constants/types';
+import { ConfigService } from '../config';
+import { HttpError } from '../errors/types/HttpError';
 
-export class Storage {
-  constructor(private readonly bucketname: string, private readonly s3: S3Client) {}
+@injectable()
+export class StorageConnector {
+  private awsConfig: any;
 
-  async putFileToBucket(pathToFile: string) {
+  private bucket: string;
+
+  private s3Client: S3Client;
+
+  constructor(@inject(TYPE.ConfigService) private configService: ConfigService) {
+    this.awsConfig = this.configService.getByKey('aws');
+    this.assignBucket();
+    this.assignS3Client();
+  }
+
+  async putFileToBucket(sid: string, pathToFile: string) {
     const fileExtension = this.getFileExtension(pathToFile);
     const command = new PutObjectCommand({
-      Bucket: this.bucketname,
-      Key: `${uuidv4()}.${fileExtension}`,
+      Bucket: this.bucket,
+      Key: `${sid}.${fileExtension}`,
       Body: fs.createReadStream(pathToFile),
     });
 
     return this.executeCommand('putFileToBucket', command);
   }
 
-  async getFileFromBucket() {}
+  // async getFileFromBucket() {}
 
-  async updateFileInBucket() {}
+  // async updateFileInBucket() {}
 
   async executeCommand(commandName: string, command: any) {
     try {
-      const response = await this.s3.send(command);
+      console.log(`${commandName} command started: `, command);
+      const response = await this.s3Client.send(command);
       console.log(`${commandName} command finished: `, response);
+      return response;
     } catch (error) {
-      console.error(`${commandName} command error: `, error);
+      const errorMessage = `${commandName} command error: ${error}`;
+      console.error(errorMessage);
+      throw new HttpError(errorMessage, 503);
     }
   }
 
-  getFileExtension(filename: string) {
+  private getFileExtension(filename: string) {
     return path.extname(filename).slice(1);
+  }
+
+  private assignBucket() {
+    this.bucket = this.awsConfig.s3?.bucket;
+  }
+
+  private assignS3Client() {
+    const region = this.awsConfig.region || 'eu-central-1';
+    const credentials = this.awsConfig.credentials || {};
+
+    this.s3Client = new S3Client({ region, credentials });
   }
 }

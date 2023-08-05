@@ -18,6 +18,16 @@ export class ConfigService {
         connectionTimeoutMillis: 2000,
       },
     },
+    aws: {
+      credentials: {
+        accessKeyId: '<access key>',
+        secretAccessKey: '<secret access key>',
+      },
+      region: 'eu-central-1',
+      s3: {
+        bucket: 'content-storage-notes',
+      },
+    },
   };
 
   public getByKey(key: string) {

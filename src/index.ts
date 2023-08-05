@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import { InversifyExpressServer } from 'inversify-express-utils';
 // import { S3Client } from '@aws-sdk/client-s3';
 import express, { Application } from 'express';
-// import { Storage } from './connectors/StorageConnector';
 import { Container } from 'inversify';
 import { buildProviderModule } from 'inversify-binding-decorators';
 
@@ -11,9 +10,10 @@ import './api/v1/controllers/UserController';
 import { errorHandler } from './errors/ErrorHandler';
 import { bindings } from './inversify.config';
 import { ConfigService } from './config';
+// import { StorageConnector } from './connectors/StorageConnector';
 
-// const s3Client = new S3Client(Config.awsCredentials);
-// const storage = new Storage(Config.s3.bucket, s3Client);
+// const s3Client = new S3Client({ region: 'eu-central-1', credentials: { accessKeyId: '', secretAccessKey: '' } });
+// const storage = new StorageConnector('content-storage-notes', s3Client);
 
 class Server {
   private readonly app: Application;

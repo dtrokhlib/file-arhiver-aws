@@ -5,3 +5,4 @@ coverage
 local-test.js
 jest.config.js
 package*.json
+dev-config.js

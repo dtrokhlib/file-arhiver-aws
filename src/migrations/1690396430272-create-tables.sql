@@ -1,18 +1,22 @@
 
 CREATE TABLE users(
   id SERIAL PRIMARY KEY,
-  name VARCHAR(100),
-  email VARCHAR(100),
-  password VARCHAR(100),
-  firstName VARCHAR(100),
-  lastName VARCHAR(100)
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(100) NOT NULL,
+  firstName VARCHAR(100) NOT NULL,
+  lastName VARCHAR(100) NOT NULL,
+  is_deleted BOOLEAN DEFAULT false,
+  is_disabled BOOLEAN DEFAULT false
 );
 
 CREATE TABLE files(
   id SERIAL PRIMARY KEY,
-  name VARCHAR(100),
-  filename VARCHAR(100),
-  extension VARCHAR(10),
-  userId INTEGER,
+  sid: VARCHAR(100) UNIQUE NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  filename VARCHAR(100) NOT NULL,
+  extension VARCHAR(10) NOT NULL,
+  is_deleted BOOLEAN DEFAULT false,
+  userId INTEGER NOT NULL,
   FOREIGN KEY (userId) REFERENCES users (id)
 );

@@ -44,7 +44,7 @@ export class Repository {
     };
 
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    return this.connection.query(queryString).then(res => res.rows);
+    return this.connection.query(queryString).then(({ rowCount, rows }) => ({ rowCount, rows }));
   }
 
   async getById(id: string) {
@@ -102,16 +102,6 @@ export class Repository {
 
     return payload;
   }
-
-  // create(entity: any): any;
-
-  // abstract delete(id: string): Promise<any>;
-
-  // abstract update(id: string, entity: any): Promise<any>;
-
-  // abstract getList(filters: any, options: any): Promise<any>;
-
-  // abstract getById(id: string): Promise<any>;
 
   protected processFilters(filters: IQueryFilters) {
     const { offset, limit, orderBy, orderType } = filters;
