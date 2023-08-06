@@ -1,10 +1,14 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
 import fs from 'fs';
 import path from 'path';
 import { inject, injectable } from 'inversify';
 import { TYPE } from '../constants/types';
 import { ConfigService } from '../config';
 import { HttpError } from '../errors/types/HttpError';
+
+const OneHour = 3600;
 
 @injectable()
 export class StorageConnector {
@@ -20,7 +24,7 @@ export class StorageConnector {
     this.assignS3Client();
   }
 
-  async putFileToBucket(sid: string, pathToFile: string) {
+  async uploadFile(sid: string, pathToFile: string) {
     const fileExtension = this.getFileExtension(pathToFile);
     const command = new PutObjectCommand({
       Bucket: this.bucket,
@@ -29,6 +33,15 @@ export class StorageConnector {
     });
 
     return this.executeCommand('putFileToBucket', command);
+  }
+
+  async getSignedUrl(sid: string) {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: sid,
+    });
+    const url = await getSignedUrl(this.s3Client as any, command as any, { expiresIn: OneHour });
+    return url;
   }
 
   // async getFileFromBucket() {}

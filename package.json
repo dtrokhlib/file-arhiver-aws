@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.363.0",
+    "@aws-sdk/s3-request-presigner": "^3.385.0",
     "@types/pg": "^8.10.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",

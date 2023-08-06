@@ -1,6 +1,10 @@
 import { IsNumber, IsString, Length } from 'class-validator';
 
 export class UploadFileDto {
+  @Length(36, 36)
+  @IsString()
+  sid: string;
+
   @Length(5, 100)
   @IsString()
   name: string;

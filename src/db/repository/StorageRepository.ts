@@ -1,10 +1,12 @@
 import { inject, injectable } from 'inversify';
-import { CreateUserDto } from 'src/models/CreateUserDto';
 import { Repository } from './Repository';
 import { ENTITIES, TYPE } from '../../constants/types';
 import { DatabaseConnector } from '../connector';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { IQueryFilters, IQuerySearch } from '../../interfaces/api/IQuery';
+import { UserRepository } from './UserRepository';
+import { HttpError } from '../../errors/types/HttpError';
+import { UploadFileDto } from '../../models/CreateFileDto';
 
 @injectable()
 export class StorageRepository extends Repository {
@@ -12,19 +14,26 @@ export class StorageRepository extends Repository {
     @inject(TYPE.DatabaseConnector) dbConnector: DatabaseConnector,
     @inject(TYPE.QueryBuilder) queryBuilder: QueryBuilder,
     @inject(ENTITIES.Storage) tableName: string,
+    @inject(TYPE.UserRepository) private userRepository: UserRepository,
   ) {
     super(dbConnector, queryBuilder, tableName);
   }
 
-  create(file: any) {
-    return super.create(file);
+  async create(payload: UploadFileDto) {
+    const { userId } = payload;
+    const isExist = await this.userRepository.getById(userId).catch(err => null);
+    if (!isExist) {
+      throw new HttpError('Not existing user specified', 400);
+    }
+
+    return super.create(payload);
   }
 
   delete(id: string) {
     return super.delete(id);
   }
 
-  update(id: string, file: any) {
+  update(id: string, file: UploadFileDto) {
     return super.update(id, file);
   }
 

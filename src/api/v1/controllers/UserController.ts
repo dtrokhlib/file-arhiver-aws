@@ -52,7 +52,6 @@ export class UserController extends BaseController {
       const user = await this.repository.update(req.params.id, req.body);
       res.json(user);
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }
@@ -61,9 +60,8 @@ export class UserController extends BaseController {
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
       await this.repository.delete(req.params.id);
-      res.send();
+      res.status(204).send();
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }

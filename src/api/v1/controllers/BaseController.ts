@@ -1,11 +1,13 @@
 import { injectable } from 'inversify';
-import { IQuery } from 'src/interfaces/api/IQuery';
+import { Request } from 'express';
+import { HttpError } from '../../../errors/types/HttpError';
+import { IQuery } from '../../../interfaces/api/IQuery';
 
 const filterKeys: string[] = ['offset', 'limit', 'orderBy', 'orderType'];
 
 @injectable()
 export class BaseController {
-  getFilters(query: IQuery) {
+  protected getFilters(query: IQuery) {
     const filters = {};
 
     Object.entries(query).forEach(([key, value]) => {
@@ -17,7 +19,7 @@ export class BaseController {
     return filters;
   }
 
-  getSearch(query: IQuery) {
+  protected getSearch(query: IQuery) {
     const search = {};
 
     Object.entries(query).forEach(([key, value]) => {
@@ -27,5 +29,11 @@ export class BaseController {
     });
 
     return search;
+  }
+
+  protected isFileProvided(req: Request) {
+    if (!req.file) {
+      throw new HttpError('File was not provided', 400);
+    }
   }
 }

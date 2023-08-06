@@ -13,14 +13,35 @@ export class StorageService {
     @inject(TYPE.StorageRepository) private repository: StorageRepository,
   ) {}
 
-  async uploadFileToBucket({ path }: IFile) {
+  async uploadFile(userId: string, file: IFile) {
     try {
-      const sid = uuidv4();
-      await this.connector.putFileToBucket(sid, path);
-      const file = await this.repository.create({ sid });
-      return file;
+      const payload = this.preparePayloadForFile(userId, file);
+      await this.connector.uploadFile(payload.sid, file.path);
+      const createdFile = await this.repository.create(payload);
+      return createdFile;
     } finally {
-      await fs.unlink(path);
+      await fs.unlink(file.path);
     }
+  }
+
+  async updateFile(fileId: string, userId: string, file: IFile) {
+    try {
+      const payload = this.preparePayloadForFile(userId, file);
+      await this.connector.uploadFile(payload.sid, file.path);
+      const createdFile = await this.repository.update(fileId, payload);
+      return createdFile;
+    } finally {
+      await fs.unlink(file.path);
+    }
+  }
+
+  private preparePayloadForFile(userId: string, file: IFile) {
+    return {
+      sid: uuidv4(),
+      name: file.originalname,
+      filename: file.filename,
+      extension: file.mimetype,
+      userId,
+    };
   }
 }
