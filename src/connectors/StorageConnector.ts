@@ -7,8 +7,7 @@ import { inject, injectable } from 'inversify';
 import { TYPE } from '../constants/types';
 import { ConfigService } from '../config';
 import { HttpError } from '../errors/types/HttpError';
-
-const OneHour = 3600;
+import { OneHourInMilliseconds } from '../constants/time';
 
 @injectable()
 export class StorageConnector {
@@ -25,23 +24,21 @@ export class StorageConnector {
   }
 
   async uploadFile(sid: string, pathToFile: string) {
-    const fileExtension = this.getFileExtension(pathToFile);
     const command = new PutObjectCommand({
       Bucket: this.bucket,
-      Key: `${sid}.${fileExtension}`,
+      Key: `${sid}.${this.getFileExtension(pathToFile)}`,
       Body: fs.createReadStream(pathToFile),
     });
 
     return this.executeCommand('putFileToBucket', command);
   }
 
-  async getSignedUrl(sid: string) {
+  getSignedUrl(sid: string, filename: string) {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
-      Key: sid,
+      Key: `${sid}.${this.getFileExtension(filename)}`,
     });
-    const url = await getSignedUrl(this.s3Client as any, command as any, { expiresIn: OneHour });
-    return url;
+    return getSignedUrl(this.s3Client as any, command as any, { expiresIn: OneHourInMilliseconds });
   }
 
   // async getFileFromBucket() {}

@@ -31,6 +31,16 @@ export class StorageController extends BaseController {
     }
   }
 
+  @httpGet('/:id/get-signed-url')
+  async getSignedUrl(req: Request, res: Response, next: NextFunction) {
+    try {
+      const url = await this.service.getSignedUrl(req.params.id);
+      res.send(url);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   @httpGet('/:id')
   async getById(req: Request, res: Response, next: NextFunction) {
     try {

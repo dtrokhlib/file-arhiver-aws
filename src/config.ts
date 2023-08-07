@@ -6,6 +6,9 @@ export class ConfigService {
     application: {
       port: 3000,
     },
+    auth: {
+      salt: 10,
+    },
     db: {
       postgres: {
         user: 'postgres',

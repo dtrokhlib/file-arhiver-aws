@@ -35,6 +35,12 @@ export class StorageService {
     }
   }
 
+  async getSignedUrl(fileId: string) {
+    const { sid, filename } = await this.repository.getById(fileId);
+    const signedUrl = await this.connector.getSignedUrl(sid, filename);
+    return { sid, signedUrl };
+  }
+
   private preparePayloadForFile(userId: string, file: IFile) {
     return {
       sid: uuidv4(),
