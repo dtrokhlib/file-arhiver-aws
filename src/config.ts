@@ -8,6 +8,10 @@ export class ConfigService {
     },
     auth: {
       salt: 10,
+      jwt: {
+        secret: '<jwt secret>',
+        expiresIn: '1h',
+      },
     },
     db: {
       postgres: {

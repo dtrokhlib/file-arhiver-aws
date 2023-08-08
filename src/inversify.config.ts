@@ -7,6 +7,7 @@ import { QueryBuilder } from './db/utils/QueryBuilder';
 import { StorageConnector } from './connectors/StorageConnector';
 import { StorageService } from './services/StorageService';
 import { StorageRepository } from './db/repository/StorageRepository';
+import { AuthenticationService } from './services/auth/AuthenticationService';
 
 export const bindings = new AsyncContainerModule(async bind => {
   bind<DatabaseConnector>(TYPE.DatabaseConnector).to(DatabaseConnector).inSingletonScope();
@@ -14,6 +15,7 @@ export const bindings = new AsyncContainerModule(async bind => {
 
   bind<ConfigService>(TYPE.ConfigService).to(ConfigService);
   bind<StorageService>(TYPE.StorageService).to(StorageService);
+  bind<AuthenticationService>(TYPE.AuthenticationService).to(AuthenticationService);
 
   bind<UserRepository>(TYPE.UserRepository).to(UserRepository);
   bind<StorageRepository>(TYPE.StorageRepository).to(StorageRepository);
