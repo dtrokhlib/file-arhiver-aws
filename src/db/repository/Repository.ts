@@ -92,6 +92,11 @@ export class Repository {
     return this.connection.query(queryString, values);
   }
 
+  async findOneByParams(search: IQuerySearch) {
+    const [record] = await this.getList({ limit: '1' }, search).then(res => res.rows);
+    return record;
+  }
+
   private async prepareDeletionPayload(id: string) {
     const record = await this.getById(id);
     const payload = { ...record, is_deleted: true };

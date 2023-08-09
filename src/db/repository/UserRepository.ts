@@ -41,6 +41,10 @@ export class UserRepository extends Repository {
     return super.getById(id);
   }
 
+  findOneByParams(search: IQuerySearch) {
+    return super.findOneByParams(search);
+  }
+
   private async hashPassword(password: string) {
     if (password) {
       const saltRounds = this.config.getByKey('auth')?.saltRounds || 10;

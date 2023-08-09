@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { InversifyExpressServer } from 'inversify-express-utils';
-import express, { Application } from 'express';
+import express, { Application, NextFunction, Response } from 'express';
 import { Container } from 'inversify';
 import { buildProviderModule } from 'inversify-binding-decorators';
 import { errorHandler } from './errors/ErrorHandler';
@@ -10,6 +10,7 @@ import { ConfigService } from './config';
 import './api/v1/controllers/StorageController';
 import './api/v1/controllers/UserController';
 import './api/v1/controllers/AuthenticationController';
+import { IRequest } from './interfaces/api/IRequest';
 
 class Server {
   private readonly app: Application;
@@ -45,6 +46,10 @@ class Server {
   setupApplication(app: Application) {
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
+    app.use((req: IRequest, res: Response, next: NextFunction) => {
+      req.container = this.container;
+      next();
+    });
   }
 
   setupMiddleware() {}

@@ -7,6 +7,7 @@ export const TYPE = {
   StorageService: Symbol.for('StorageService'),
   QueryBuilder: Symbol.for('QueryBuilder'),
   AuthenticationService: Symbol.for('AuthenticationService'),
+  RoutesProtector: Symbol.for('RoutesProtector'),
 };
 
 export const ENTITIES = {

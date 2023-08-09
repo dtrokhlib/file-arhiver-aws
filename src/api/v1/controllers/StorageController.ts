@@ -8,6 +8,8 @@ import { StorageRepository } from '../../../db/repository/StorageRepository';
 import { BaseController } from './BaseController';
 import { IQuery } from '../../../interfaces/api/IQuery';
 import { IFile } from '../../../interfaces/api/IFile';
+import { AuthProtect } from '../middlewares/AuthProtect';
+import { IRequest } from '../../../interfaces/api/IRequest';
 
 @controller('/api/v1/storage')
 export class StorageController extends BaseController {
@@ -18,9 +20,10 @@ export class StorageController extends BaseController {
     super();
   }
 
-  @httpGet('/')
-  async list(req: Request, res: Response, next: NextFunction) {
+  @httpGet('/', AuthProtect)
+  async list(req: IRequest, res: Response, next: NextFunction) {
     try {
+      console.log(req.user);
       const queries = { ...req.query, is_deleted: false } as IQuery;
       const filters = this.getFilters(queries);
       const search = this.getSearch(queries);
@@ -32,7 +35,7 @@ export class StorageController extends BaseController {
   }
 
   @httpGet('/:id/get-signed-url')
-  async getSignedUrl(req: Request, res: Response, next: NextFunction) {
+  async getSignedUrl(req: IRequest, res: Response, next: NextFunction) {
     try {
       const url = await this.service.getSignedUrl(req.params.id);
       res.send(url);

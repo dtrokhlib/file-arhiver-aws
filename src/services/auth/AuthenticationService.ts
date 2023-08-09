@@ -20,29 +20,26 @@ export class AuthenticationService {
 
   async authenticate(user: AuthenticationDto) {
     await this.verifyUser(user);
-    return this.signToken({ id: user.email });
+    return this.signToken({ email: user.email });
   }
 
-  async signToken(payload: any) {
+  private async signToken(payload: any) {
     const { secret, expiresIn } = this.authConfig.jwt;
     const token = asyncSign(payload, secret, { expiresIn });
     return token;
   }
 
-  async verifyToken(token: string) {
+  async decodeToken(token: string) {
     const { secret } = this.authConfig.jwt;
     const decodedPayload = await asyncVerify(token, secret);
     return decodedPayload;
   }
 
-  async verifyUser(user: any) {
-    const [existingUser] = await this.userRepository
-      .getList({ limit: '1' }, { email: user.email })
-      .then(res => res.rows);
-
+  private async verifyUser({ email, password }: AuthenticationDto) {
+    const existingUser = await this.userRepository.findOneByParams({ email });
     this.verifyPositiveCase(existingUser);
 
-    const isValidPassword = await compare(user.password, existingUser.password);
+    const isValidPassword = await compare(password, existingUser.password);
     this.verifyPositiveCase(isValidPassword);
   }
 
