@@ -6,11 +6,12 @@ import { buildProviderModule } from 'inversify-binding-decorators';
 import { errorHandler } from './errors/ErrorHandler';
 import { bindings } from './inversify.config';
 import { ConfigService } from './config';
+import { IRequest } from './interfaces/api/IRequest';
+import { RequestLogger } from './api/v1/middlewares/RequestLogger';
 
 import './api/v1/controllers/StorageController';
 import './api/v1/controllers/UserController';
 import './api/v1/controllers/AuthenticationController';
-import { IRequest } from './interfaces/api/IRequest';
 
 class Server {
   private readonly app: Application;
@@ -50,6 +51,7 @@ class Server {
       req.container = this.container;
       next();
     });
+    app.use(RequestLogger);
   }
 
   setupMiddleware() {}

@@ -23,8 +23,7 @@ export class StorageController extends BaseController {
   @httpGet('/', AuthProtect)
   async list(req: IRequest, res: Response, next: NextFunction) {
     try {
-      console.log(req.user);
-      const queries = { ...req.query, is_deleted: false } as IQuery;
+      const queries = { ...req.query, is_deleted: false, userid: req.user.id } as IQuery;
       const filters = this.getFilters(queries);
       const search = this.getSearch(queries);
       const files = await this.repository.getList(filters, search);
@@ -34,7 +33,7 @@ export class StorageController extends BaseController {
     }
   }
 
-  @httpGet('/:id/get-signed-url')
+  @httpGet('/:id/get-signed-url', AuthProtect)
   async getSignedUrl(req: IRequest, res: Response, next: NextFunction) {
     try {
       const url = await this.service.getSignedUrl(req.params.id);
@@ -44,7 +43,7 @@ export class StorageController extends BaseController {
     }
   }
 
-  @httpGet('/:id')
+  @httpGet('/:id', AuthProtect)
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const file = await this.repository.getById(req.params.id);
@@ -54,31 +53,29 @@ export class StorageController extends BaseController {
     }
   }
 
-  @httpPost('/', upload.single('file'))
-  async create(req: Request, res: Response, next: NextFunction) {
+  @httpPost('/', AuthProtect, upload.single('file'))
+  async create(req: IRequest, res: Response, next: NextFunction) {
     try {
       this.isFileProvided(req);
-      const userId = '3';
-      const file = await this.service.uploadFile(userId, req.file as IFile);
+      const file = await this.service.uploadFile(req.user.id, req.file as IFile);
       res.send(file);
     } catch (error) {
       next(error);
     }
   }
 
-  @httpPut('/:id', upload.single('file'))
-  async update(req: Request, res: Response, next: NextFunction) {
+  @httpPut('/:id', AuthProtect, upload.single('file'))
+  async update(req: IRequest, res: Response, next: NextFunction) {
     try {
       this.isFileProvided(req);
-      const userId = '3';
-      const file = await this.service.updateFile(req.params.id, userId, req.file as IFile);
+      const file = await this.service.updateFile(req.params.id, req.user.id, req.file as IFile);
       res.send(file);
     } catch (error) {
       next(error);
     }
   }
 
-  @httpDelete('/:id')
+  @httpDelete('/:id', AuthProtect)
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
       await this.repository.delete(req.params.id);

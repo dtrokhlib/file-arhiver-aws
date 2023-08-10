@@ -97,6 +97,15 @@ export class Repository {
     return record;
   }
 
+  async verifyContentOwner(user: any, record: any) {
+    
+  }
+
+  async filterContentByOwner(user: any, records: any) {
+    const list = records || [];
+
+  }
+
   private async prepareDeletionPayload(id: string) {
     const record = await this.getById(id);
     const payload = { ...record, is_deleted: true };
