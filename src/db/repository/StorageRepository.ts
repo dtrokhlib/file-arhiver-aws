@@ -13,8 +13,8 @@ export class StorageRepository extends Repository {
   constructor(
     @inject(TYPE.DatabaseConnector) dbConnector: DatabaseConnector,
     @inject(TYPE.QueryBuilder) queryBuilder: QueryBuilder,
-    @inject(ENTITIES.Storage) tableName: string,
     @inject(TYPE.UserRepository) private userRepository: UserRepository,
+    @inject(ENTITIES.Storage) tableName: string,
   ) {
     super(dbConnector, queryBuilder, tableName);
   }

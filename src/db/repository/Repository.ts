@@ -35,7 +35,7 @@ export class Repository {
     return createdRecord;
   }
 
-  protected getList(filters: IQueryFilters, search: IQuerySearch) {
+  getList(filters: IQueryFilters, search: IQuerySearch) {
     const queryOptions: IQueryOptions = {
       table: this.tableName,
       type: QueryType.SELECT,
@@ -95,15 +95,6 @@ export class Repository {
   async findOneByParams(search: IQuerySearch) {
     const [record] = await this.getList({ limit: '1' }, search).then(res => res.rows);
     return record;
-  }
-
-  async verifyContentOwner(user: any, record: any) {
-    
-  }
-
-  async filterContentByOwner(user: any, records: any) {
-    const list = records || [];
-
   }
 
   private async prepareDeletionPayload(id: string) {

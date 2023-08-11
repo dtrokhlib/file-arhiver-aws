@@ -36,7 +36,7 @@ export class StorageController extends BaseController {
   @httpGet('/:id/get-signed-url', AuthProtect)
   async getSignedUrl(req: IRequest, res: Response, next: NextFunction) {
     try {
-      const url = await this.service.getSignedUrl(req.params.id);
+      const url = await this.service.getSignedUrl(req.user.id, req.params.id);
       res.send(url);
     } catch (error) {
       next(error);
@@ -44,9 +44,10 @@ export class StorageController extends BaseController {
   }
 
   @httpGet('/:id', AuthProtect)
-  async getById(req: Request, res: Response, next: NextFunction) {
+  async getById(req: IRequest, res: Response, next: NextFunction) {
     try {
       const file = await this.repository.getById(req.params.id);
+      this.isRecordOwner(req.user.id, file);
       res.json(file);
     } catch (error) {
       next(error);

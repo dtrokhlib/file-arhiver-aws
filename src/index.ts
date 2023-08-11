@@ -3,11 +3,11 @@ import { InversifyExpressServer } from 'inversify-express-utils';
 import express, { Application, NextFunction, Response } from 'express';
 import { Container } from 'inversify';
 import { buildProviderModule } from 'inversify-binding-decorators';
+import morgan from 'morgan';
 import { errorHandler } from './errors/ErrorHandler';
 import { bindings } from './inversify.config';
 import { ConfigService } from './config';
 import { IRequest } from './interfaces/api/IRequest';
-import { RequestLogger } from './api/v1/middlewares/RequestLogger';
 
 import './api/v1/controllers/StorageController';
 import './api/v1/controllers/UserController';
@@ -51,7 +51,7 @@ class Server {
       req.container = this.container;
       next();
     });
-    app.use(RequestLogger);
+    app.use(morgan('[:date[clf]] :method :url :status :res[content-length] - :response-time ms'));
   }
 
   setupMiddleware() {}

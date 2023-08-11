@@ -5,6 +5,7 @@ import { TYPE } from '../constants/types';
 import { StorageConnector } from '../connectors/StorageConnector';
 import { IFile } from '../interfaces/api/IFile';
 import { StorageRepository } from '../db/repository/StorageRepository';
+import { HttpError } from '../errors/types/HttpError';
 
 @injectable()
 export class StorageService {
@@ -16,8 +17,8 @@ export class StorageService {
   async uploadFile(userId: string, file: IFile) {
     try {
       const payload = this.preparePayloadForFile(userId, file);
-      await this.connector.uploadFile(payload.sid, file.path);
       const createdFile = await this.repository.create(payload);
+      await this.connector.uploadFile(payload.sid, file.path);
       return createdFile;
     } finally {
       await fs.unlink(file.path);
@@ -27,18 +28,22 @@ export class StorageService {
   async updateFile(fileId: string, userId: string, file: IFile) {
     try {
       const payload = this.preparePayloadForFile(userId, file);
-      await this.connector.uploadFile(payload.sid, file.path);
       const createdFile = await this.repository.update(fileId, payload);
+      await this.connector.uploadFile(payload.sid, file.path);
       return createdFile;
     } finally {
       await fs.unlink(file.path);
     }
   }
 
-  async getSignedUrl(fileId: string) {
-    const { sid, filename } = await this.repository.getById(fileId);
-    const signedUrl = await this.connector.getSignedUrl(sid, filename);
-    return { sid, signedUrl };
+  async getSignedUrl(userId: string, fileId: string) {
+    const file = await this.repository.findOneByParams({ userid: userId, id: fileId });
+    if (!file) {
+      throw new HttpError('File not found', 404);
+    }
+
+    const signedUrl = await this.connector.getSignedUrl(file.sid, file.filename);
+    return { sid: file.sid, signedUrl };
   }
 
   private preparePayloadForFile(userId: string, file: IFile) {

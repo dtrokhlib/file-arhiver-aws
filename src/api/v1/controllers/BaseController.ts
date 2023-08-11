@@ -7,6 +7,13 @@ const filterKeys: string[] = ['offset', 'limit', 'orderBy', 'orderType'];
 
 @injectable()
 export class BaseController {
+  protected isRecordOwner(userId: string, entity: any) {
+    if (userId !== entity?.userid) {
+      throw new HttpError('Not Authorized', 401);
+    }
+    return entity;
+  }
+
   protected getFilters(query: IQuery) {
     const filters = {};
 
