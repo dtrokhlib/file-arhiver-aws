@@ -40,13 +40,16 @@ export class QueryBuilder {
   }
 
   private createInsertQuery(options: IQueryOptions) {
-    const { table, payload } = options;
+    const { table, payload, excludeReturnFields } = options;
     const values = Object.values(payload);
     const keys = Object.keys(payload);
     const joinedFieldValues = this.processFieldValues(values);
     const joinedFieldKeys = this.processFieldKeys(keys);
 
-    const query = `INSERT INTO ${table} (${joinedFieldKeys}) values (${joinedFieldValues}) RETURNING *`;
+    const query = `INSERT INTO ${table} (${joinedFieldKeys}) values (${joinedFieldValues}) ${this.defineReturningFields(
+      keys,
+      excludeReturnFields,
+    )}`;
     return query;
   }
 
@@ -57,10 +60,13 @@ export class QueryBuilder {
   }
 
   private createUpdateQuery(options: IQueryOptions) {
-    const { table, payload } = options;
+    const { table, payload, excludeReturnFields } = options;
     const keys = Object.keys(payload);
     const keyIndexPairs = this.createKeyIndexPairs(keys);
-    const query = `${this.assignFiltersAndSearch(`UPDATE ${table} SET ${keyIndexPairs}`, options)} RETURNING *`;
+    const query = `${this.assignFiltersAndSearch(
+      `UPDATE ${table} SET ${keyIndexPairs}`,
+      options,
+    )} ${this.defineReturningFields(keys, excludeReturnFields)}`;
     return query;
   }
 
@@ -95,6 +101,13 @@ export class QueryBuilder {
     }
 
     return filterQueries.join(' ');
+  }
+
+  private defineReturningFields(keys: string[], excludeReturnFields?: string[]) {
+    if (excludeReturnFields) {
+      return `RETURNING ${keys.filter((key: string) => !excludeReturnFields.includes(key))}`;
+    }
+    return 'RETURNING *';
   }
 
   private processSearch(search: IQuerySearch) {

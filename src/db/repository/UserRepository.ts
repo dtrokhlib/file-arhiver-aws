@@ -1,26 +1,23 @@
 import { inject, injectable } from 'inversify';
-import { genSalt, hash } from 'bcrypt';
 import { CreateUserDto } from 'src/models/CreateUserDto';
 import { Repository } from './Repository';
-import { ENTITIES, TYPE } from '../../constants/types';
+import { ENTITIES, EXCLUDED_FIELDS, TYPE } from '../../constants/types';
 import { DatabaseConnector } from '../connector';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { IQueryFilters, IQuerySearch } from '../../interfaces/api/IQuery';
-import { ConfigService } from '../../config';
 
 @injectable()
 export class UserRepository extends Repository {
   constructor(
-    @inject(TYPE.ConfigService) private readonly config: ConfigService,
     @inject(TYPE.DatabaseConnector) dbConnector: DatabaseConnector,
     @inject(TYPE.QueryBuilder) queryBuilder: QueryBuilder,
     @inject(ENTITIES.User) tableName: string,
+    @inject(EXCLUDED_FIELDS.User) excludeReturnFields: string[],
   ) {
-    super(dbConnector, queryBuilder, tableName);
+    super(dbConnector, queryBuilder, { tableName, excludeReturnFields });
   }
 
   async create(user: CreateUserDto) {
-    Object.assign(user, await this.hashPassword(user.password));
     return super.create(user);
   }
 
@@ -29,7 +26,6 @@ export class UserRepository extends Repository {
   }
 
   async update(id: string, user: CreateUserDto) {
-    Object.assign(user, await this.hashPassword(user.password));
     return super.update(id, user);
   }
 
@@ -43,15 +39,5 @@ export class UserRepository extends Repository {
 
   findOneByParams(search: IQuerySearch) {
     return super.findOneByParams(search);
-  }
-
-  private async hashPassword(password: string) {
-    if (password) {
-      const saltRounds = this.config.getByKey('auth')?.saltRounds || 10;
-      const salt = await genSalt(saltRounds);
-      const hashedPassword = await hash(password, salt);
-      return { password: hashedPassword };
-    }
-    return {};
   }
 }

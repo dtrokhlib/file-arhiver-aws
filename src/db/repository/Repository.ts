@@ -2,99 +2,75 @@ import { injectable } from 'inversify';
 import { Pool } from 'pg';
 import { DatabaseConnector } from '../connector';
 import { IQueryFilters, IQuerySearch } from '../../interfaces/api/IQuery';
-import { OrderType } from '../../interfaces/db/OrderType';
-import { IQueryOptions } from '../../interfaces/db/QueryOptions';
+import { IQueryOptions, IQueryRawOptions } from '../../interfaces/db/QueryOptions';
 import { QueryType } from '../../interfaces/db/QueryType';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { HttpError } from '../../errors/types/HttpError';
+import { EntityConfig } from '../../interfaces/db/EntityConfig';
 
 @injectable()
 export class Repository {
-  protected tableName: string;
+  protected entityConfig: EntityConfig;
 
   protected queryBuilder: QueryBuilder;
 
   protected readonly connection: Pool;
 
-  constructor(dbConnector: DatabaseConnector, queryBuilder: QueryBuilder, tableName: string) {
+  constructor(dbConnector: DatabaseConnector, queryBuilder: QueryBuilder, entityConfig: EntityConfig) {
     this.connection = dbConnector.getConnection();
     this.queryBuilder = queryBuilder;
-    this.tableName = tableName;
+    this.entityConfig = entityConfig;
   }
 
   async create(payload: any) {
-    const values = Object.values(payload);
-    const queryOptions: IQueryOptions = {
-      table: this.tableName,
-      type: QueryType.INSERT,
-      payload,
-    };
-
+    const queryOptions = this.buildQueryOptions(QueryType.INSERT, { payload });
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    const [createdRecord] = await this.connection.query(queryString, values).then(res => res.rows);
+    const [createdRecord] = await this.executeQuery(queryString, payload);
     return createdRecord;
   }
 
   getList(filters: IQueryFilters, search: IQuerySearch) {
-    const queryOptions: IQueryOptions = {
-      table: this.tableName,
-      type: QueryType.SELECT,
-      filters,
-      search,
-    };
-
+    const queryOptions = this.buildQueryOptions(QueryType.SELECT, { filters, search });
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    return this.connection.query(queryString).then(({ rowCount, rows }) => ({ rowCount, rows }));
+    return this.executeQuery(queryString);
   }
 
   async getById(id: string) {
-    const queryOptions: IQueryOptions = {
-      table: this.tableName,
-      type: QueryType.SELECT,
-      search: { id },
-    };
-
+    const queryOptions = this.buildQueryOptions(QueryType.SELECT, { search: { id } });
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    const [dbRecord] = await this.connection.query(queryString).then(res => res.rows);
-
-    if (!dbRecord) {
-      throw new HttpError(`Record with ID {${id}} in ${this.tableName} table, not found.`, 404);
-    }
-
+    const [dbRecord] = await this.executeQuery(queryString);
+    this.verifyRecordExisting(id, dbRecord);
     return dbRecord;
   }
 
   async update(id: string, payload: any) {
-    const queryOptions: IQueryOptions = {
-      table: this.tableName,
-      type: QueryType.UPDATE,
-      search: { id },
-      payload,
-    };
-
-    const values = Object.values(payload);
+    const queryOptions = this.buildQueryOptions(QueryType.UPDATE, { search: { id }, payload });
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    const [updatedRecord] = await this.connection.query(queryString, values).then(res => res.rows);
+    const [updatedRecord] = await this.executeQuery(queryString, payload);
     return updatedRecord;
   }
 
   async delete(id: string) {
     const payload = await this.prepareDeletionPayload(id);
-    const queryOptions: IQueryOptions = {
-      table: this.tableName,
-      type: QueryType.UPDATE,
-      search: { id },
-      payload,
-    };
-
+    const queryOptions = this.buildQueryOptions(QueryType.DELETE, { search: { id }, payload });
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    const values = Object.values(payload);
-    return this.connection.query(queryString, values);
+    return this.executeQuery(queryString, payload);
   }
 
   async findOneByParams(search: IQuerySearch) {
-    const [record] = await this.getList({ limit: '1' }, search).then(res => res.rows);
+    const [record] = await this.getList({ limit: '1' }, search);
     return record;
+  }
+
+  executeQuery(queryString: string, payload?: any): Promise<any> {
+    return this.runQueryWithArgs(queryString, payload).then(res => res.rows);
+  }
+
+  runQueryWithArgs(queryString: string, payload: any) {
+    if (payload) {
+      return this.connection.query(queryString, Object.values(payload));
+    }
+    return this.connection.query(queryString);
   }
 
   private async prepareDeletionPayload(id: string) {
@@ -108,32 +84,18 @@ export class Repository {
     return payload;
   }
 
-  protected processFilters(filters: IQueryFilters) {
-    const { offset, limit, orderBy, orderType } = filters;
-    const filterQueries: string[] = [];
-
-    if (orderBy) {
-      filterQueries.push(`ORDER BY ${orderBy} ${orderType || OrderType.ASC}`);
+  private verifyRecordExisting(id: string, dbRecord: any) {
+    if (!dbRecord) {
+      throw new HttpError(`Record with ID {${id}} in ${this.entityConfig.tableName} table, not found.`, 404);
     }
-
-    if (limit) {
-      filterQueries.push(`LIMIT ${limit}`);
-    }
-
-    if (offset) {
-      filterQueries.push(`OFFSET ${offset}`);
-    }
-
-    return filterQueries.join(' ');
   }
 
-  protected processSearch(search: IQuerySearch) {
-    const searchQueries: string[] = [];
-
-    Object.entries(search).forEach(([field, value]) => {
-      searchQueries.push(`${field} = ${value}`);
-    });
-
-    return searchQueries.join(' ');
+  protected buildQueryOptions(type: QueryType, params: IQueryRawOptions): IQueryOptions {
+    return {
+      table: this.entityConfig.tableName,
+      excludeReturnFields: this.entityConfig.excludeReturnFields,
+      type,
+      ...params,
+    };
   }
 }
