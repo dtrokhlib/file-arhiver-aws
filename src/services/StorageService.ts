@@ -6,18 +6,40 @@ import { StorageConnector } from '../connectors/StorageConnector';
 import { IFile } from '../interfaces/api/IFile';
 import { StorageRepository } from '../db/repository/StorageRepository';
 import { HttpError } from '../errors/types/HttpError';
+import { IQueryFilters, IQuerySearch } from '../interfaces/api/IQuery';
+import { BaseService } from './BaseService';
+import { UserRepository } from '../db/repository/UserRepository';
 
 @injectable()
-export class StorageService {
+export class StorageService extends BaseService {
   constructor(
     @inject(TYPE.StorageConnector) private connector: StorageConnector,
-    @inject(TYPE.StorageRepository) private repository: StorageRepository,
-  ) {}
+    @inject(TYPE.StorageRepository) private storageRepository: StorageRepository,
+    @inject(TYPE.UserRepository) private userRepository: UserRepository,
+  ) {
+    super();
+  }
+
+  getList(filters: IQueryFilters, search: IQuerySearch) {
+    return this.storageRepository.getList(filters, search);
+  }
+
+  async getById(id: string) {
+    const file = await this.storageRepository.getById(id);
+    this.isRecordOwner(id, file);
+
+    return file;
+  }
+
+  delete(id: string) {
+    return this.storageRepository.delete(id);
+  }
 
   async uploadFile(userId: string, file: IFile) {
     try {
       const payload = this.preparePayloadForFile(userId, file);
-      const createdFile = await this.repository.create(payload);
+      await this.verifyFileUploader(payload.userId);
+      const createdFile = await this.storageRepository.create(payload);
       await this.connector.uploadFile(payload.sid, file.path);
       return createdFile;
     } finally {
@@ -28,7 +50,7 @@ export class StorageService {
   async updateFile(fileId: string, userId: string, file: IFile) {
     try {
       const payload = this.preparePayloadForFile(userId, file);
-      const createdFile = await this.repository.update(fileId, payload);
+      const createdFile = await this.storageRepository.update(fileId, payload);
       await this.connector.uploadFile(payload.sid, file.path);
       return createdFile;
     } finally {
@@ -37,7 +59,7 @@ export class StorageService {
   }
 
   async getSignedUrl(userId: string, fileId: string) {
-    const file = await this.repository.findOneByParams({ userid: userId, id: fileId });
+    const file = await this.storageRepository.findOneByParams({ userid: userId, id: fileId });
     if (!file) {
       throw new HttpError('File not found', 404);
     }
@@ -54,5 +76,12 @@ export class StorageService {
       extension: file.mimetype,
       userId,
     };
+  }
+
+  async verifyFileUploader(userId: string) {
+    const isExist = await this.userRepository.getById(userId).catch(err => null);
+    if (!isExist) {
+      throw new HttpError('Not existing user specified', 400);
+    }
   }
 }

@@ -1,3 +1,4 @@
-1. Remove direct use of repositories from controllers and replace them with services
-2. Add unit-test for query builder
 3. Add test with supertest for api routes with mocked db?
+4. Create dockerfile 
+5. Add load tests
+6. Add complex db queries

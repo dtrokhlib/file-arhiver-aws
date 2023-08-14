@@ -4,7 +4,6 @@ import { inject } from 'inversify';
 import upload from '../../../utils/Uploder';
 import { TYPE } from '../../../constants/types';
 import { StorageService } from '../../../services/StorageService';
-import { StorageRepository } from '../../../db/repository/StorageRepository';
 import { BaseController } from './BaseController';
 import { IQuery } from '../../../interfaces/api/IQuery';
 import { IFile } from '../../../interfaces/api/IFile';
@@ -13,10 +12,7 @@ import { IRequest } from '../../../interfaces/api/IRequest';
 
 @controller('/api/v1/storage')
 export class StorageController extends BaseController {
-  constructor(
-    @inject(TYPE.StorageService) private service: StorageService,
-    @inject(TYPE.StorageRepository) private repository: StorageRepository,
-  ) {
+  constructor(@inject(TYPE.StorageService) private service: StorageService) {
     super();
   }
 
@@ -26,7 +22,7 @@ export class StorageController extends BaseController {
       const queries = { ...req.query, is_deleted: false, userid: req.user.id } as IQuery;
       const filters = this.getFilters(queries);
       const search = this.getSearch(queries);
-      const files = await this.repository.getList(filters, search);
+      const files = await this.service.getList(filters, search);
       res.json(files);
     } catch (error) {
       next(error);
@@ -46,8 +42,7 @@ export class StorageController extends BaseController {
   @httpGet('/:id', AuthProtect)
   async getById(req: IRequest, res: Response, next: NextFunction) {
     try {
-      const file = await this.repository.getById(req.params.id);
-      this.isRecordOwner(req.user.id, file);
+      const file = await this.service.getById(req.params.id);
       res.json(file);
     } catch (error) {
       next(error);
@@ -79,7 +74,7 @@ export class StorageController extends BaseController {
   @httpDelete('/:id', AuthProtect)
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      await this.repository.delete(req.params.id);
+      await this.service.delete(req.params.id);
       res.status(204).send();
     } catch (error) {
       next(error);
