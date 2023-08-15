@@ -59,7 +59,13 @@ class Server {
   setupErrorHandler() {
     this.app.use(errorHandler);
   }
+
+  getApplication() {
+    return this.app;
+  }
 }
 
 const server = new Server();
 server.listen();
+
+export const app = server.getApplication();
