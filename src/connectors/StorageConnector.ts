@@ -1,7 +1,6 @@
 import { PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
-import fs from 'fs';
+import { createReadStream } from 'fs';
 import path from 'path';
 import { inject, injectable } from 'inversify';
 import { TYPE } from '../constants/types';
@@ -27,7 +26,7 @@ export class StorageConnector {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: `${sid}.${this.getFileExtension(pathToFile)}`,
-      Body: fs.createReadStream(pathToFile),
+      Body: createReadStream(pathToFile),
     });
 
     return this.executeCommand('putFileToBucket', command);

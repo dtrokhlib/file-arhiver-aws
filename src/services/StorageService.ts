@@ -43,7 +43,7 @@ export class StorageService extends BaseService {
       await this.connector.uploadFile(payload.sid, file.path);
       return createdFile;
     } finally {
-      await fs.unlink(file.path);
+      await fs.unlink(file.path).catch(console.error);
     }
   }
 
@@ -54,7 +54,7 @@ export class StorageService extends BaseService {
       await this.connector.uploadFile(payload.sid, file.path);
       return createdFile;
     } finally {
-      await fs.unlink(file.path);
+      await fs.unlink(file.path).catch(console.error);
     }
   }
 
@@ -79,7 +79,7 @@ export class StorageService extends BaseService {
   }
 
   async verifyFileUploader(userId: string) {
-    const isExist = await this.userRepository.getById(userId).catch(err => null);
+    const isExist = await this.userRepository.getById(userId);
     if (!isExist) {
       throw new HttpError('Not existing user specified', 400);
     }

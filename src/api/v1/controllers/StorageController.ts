@@ -33,7 +33,7 @@ export class StorageController extends BaseController {
   async getSignedUrl(req: IRequest, res: Response, next: NextFunction) {
     try {
       const url = await this.service.getSignedUrl(req.user.id, req.params.id);
-      res.send(url);
+      res.json(url);
     } catch (error) {
       next(error);
     }
@@ -54,7 +54,7 @@ export class StorageController extends BaseController {
     try {
       this.isFileProvided(req);
       const file = await this.service.uploadFile(req.user.id, req.file as IFile);
-      res.send(file);
+      res.json(file);
     } catch (error) {
       next(error);
     }
@@ -65,7 +65,7 @@ export class StorageController extends BaseController {
     try {
       this.isFileProvided(req);
       const file = await this.service.updateFile(req.params.id, req.user.id, req.file as IFile);
-      res.send(file);
+      res.json(file);
     } catch (error) {
       next(error);
     }

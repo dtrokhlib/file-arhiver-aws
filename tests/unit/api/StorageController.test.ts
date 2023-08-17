@@ -1,5 +1,5 @@
-import fs from 'fs';
 import 'reflect-metadata';
+import fs from 'fs';
 import { StorageController } from '../../../src/api/v1/controllers/StorageController';
 import { StorageService } from '../../../src/services/StorageService';
 import { ConfigService } from '../../../src/config';
@@ -28,17 +28,15 @@ const getMockedRepository = (body?: any) =>
 
 const createStorageController = (body?: any) => {
   const storageRepository = getMockedRepository(body);
-  const userRepository = getMockedRepository();
+  const userRepository = getMockedRepository(body);
   const configService = new ConfigService();
-
   const storageConnector = new StorageConnector(configService);
-  fs.createReadStream = jest.fn();
-  jest.spyOn(storageConnector, 'executeCommand').mockImplementation();
+  jest.spyOn(storageConnector, 'uploadFile').mockImplementation();
 
   const storageService = new StorageService(storageConnector, storageRepository, userRepository);
   const controller = new StorageController(storageService);
 
-  return { controller, storageService, userRepository, storageRepository };
+  return { controller, storageService, storageConnector, userRepository, storageRepository };
 };
 
 const getDefaultEndpointParams = (body?: any) => ({
@@ -53,23 +51,20 @@ const getDefaultEndpointParams = (body?: any) => ({
 
 describe('Storage Controller API Endpoints', () => {
   test('Upload file', async () => {
-    const { controller, storageService } = createStorageController();
+    const payload = { userid: 1 };
+    const { controller } = createStorageController(payload);
     const { req, res, next } = getDefaultEndpointParams();
 
-    const spy = jest.spyOn(storageService, 'uploadFile');
     await controller.create(req, res, next);
 
-    console.log(res.json.mock.calls);
+    expect(res.json).toBeCalled();
   });
 
   test('Get file by id', async () => {
-    const { controller, storageService } = createStorageController();
+    const { controller } = createStorageController();
     const { req, res, next } = getDefaultEndpointParams();
 
-    const spy = jest.spyOn(storageService as any, 'isRecordOwner');
     await controller.getById(req, res, next);
-
-    console.log(spy.mock.calls);
   });
 
   test('Get file list', async () => {
@@ -78,20 +73,22 @@ describe('Storage Controller API Endpoints', () => {
 
     await controller.list(req, res, next);
 
-    expect(res.json).toBeCalledWith();
+    expect(res.json).toBeCalled();
   });
 
   test('Update file', async () => {
-    const { controller } = createStorageController();
+    const payload = { userid: 1 };
+    const { controller } = createStorageController(payload);
     const { req, res, next } = getDefaultEndpointParams();
 
     await controller.update(req, res, next);
 
-    expect(res.json).toBeCalledWith();
+    expect(res.json).toBeCalled();
   });
 
   test('Delete file', async () => {
-    const { controller } = createStorageController();
+    const payload = { userid: 1 };
+    const { controller } = createStorageController(payload);
     const { req, res, next } = getDefaultEndpointParams();
 
     await controller.delete(req, res, next);
