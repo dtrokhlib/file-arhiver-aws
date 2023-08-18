@@ -1,12 +1,12 @@
 import { NextFunction, Response } from 'express';
-import { TYPE } from '../../../constants/types';
-import { RoutesProtector } from '../../../services/auth/RoutesProtector';
 import { IRequest } from '../../../interfaces/api/IRequest';
+import { HttpError } from '../../../errors/types/HttpError';
 
 export const AuthProtect = async (req: IRequest, res: Response, next: NextFunction) => {
   try {
-    const protector = req.container?.get<RoutesProtector>(TYPE.RoutesProtector);
-    req.user = await protector?.isAuthenticated(req.headers.authorization);
+    if (!req.user) {
+      throw new HttpError('Unauthorized', 401);
+    }
     next();
   } catch (error) {
     next(error);

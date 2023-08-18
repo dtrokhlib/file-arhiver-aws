@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import fs from 'fs';
 import { StorageController } from '../../../src/api/v1/controllers/StorageController';
 import { StorageService } from '../../../src/services/StorageService';
 import { ConfigService } from '../../../src/config';
@@ -32,6 +31,7 @@ const createStorageController = (body?: any) => {
   const configService = new ConfigService();
   const storageConnector = new StorageConnector(configService);
   jest.spyOn(storageConnector, 'uploadFile').mockImplementation();
+  jest.spyOn(storageConnector, 'getSignedUrl').mockImplementation();
 
   const storageService = new StorageService(storageConnector, storageRepository, userRepository);
   const controller = new StorageController(storageService);
@@ -94,5 +94,15 @@ describe('Storage Controller API Endpoints', () => {
     await controller.delete(req, res, next);
 
     expect(res.status).toBeCalledWith(204);
+  });
+
+  test('Get signed url for file', async () => {
+    const payload = { userid: 1 };
+    const { controller } = createStorageController(payload);
+    const { req, res, next } = getDefaultEndpointParams();
+
+    await controller.getSignedUrl(req, res, next);
+
+    expect(res.json).toBeCalled();
   });
 });

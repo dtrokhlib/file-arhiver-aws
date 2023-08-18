@@ -12,6 +12,7 @@ import { IRequest } from './interfaces/api/IRequest';
 import './api/v1/controllers/StorageController';
 import './api/v1/controllers/UserController';
 import './api/v1/controllers/AuthenticationController';
+import { addUserToRequest } from './api/v1/middlewares/AddUserToRequest';
 
 class Server {
   private readonly app: Application;
@@ -54,7 +55,9 @@ class Server {
     app.use(morgan('[:date[clf]] :method :url :status :res[content-length] - :response-time ms'));
   }
 
-  setupMiddleware() {}
+  setupMiddleware() {
+    this.app.use(addUserToRequest);
+  }
 
   setupErrorHandler() {
     this.app.use(errorHandler);

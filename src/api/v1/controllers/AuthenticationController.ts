@@ -2,7 +2,7 @@ import { controller, httpPost } from 'inversify-express-utils';
 import { inject } from 'inversify';
 import { NextFunction, Request, Response } from 'express';
 import { BaseController } from './BaseController';
-import { AuthenticationValidator } from '../middlewares/AuthenticationValidator';
+import { AuthPayloadValidation } from '../middlewares/AuthPayloadValidation';
 import { TYPE } from '../../../constants/types';
 import { AuthenticationService } from '../../../services/auth/AuthenticationService';
 
@@ -12,11 +12,11 @@ export class AuthenticationController extends BaseController {
     super();
   }
 
-  @httpPost('/authenticate', AuthenticationValidator)
+  @httpPost('/authenticate', AuthPayloadValidation)
   async authenticate(req: Request, res: Response, next: NextFunction) {
     try {
       const accessToken = await this.service.authenticate(req.body);
-      res.send({ accessToken });
+      res.json({ accessToken });
     } catch (error) {
       next(error);
     }

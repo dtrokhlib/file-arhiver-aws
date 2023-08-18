@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ValidationError } from '../../../errors/types/ValidationError';
 import { AuthenticationDto } from '../../../models/AuthenticationDto';
 
-export const AuthenticationValidator = async (req: Request, res: Response, next: NextFunction) => {
+export const AuthPayloadValidation = async (req: Request, res: Response, next: NextFunction) => {
   const auth = plainToClass(AuthenticationDto, req.body);
   const errors = await validate(auth);
 

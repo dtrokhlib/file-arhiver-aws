@@ -15,7 +15,7 @@ export class RoutesProtector {
     @inject(TYPE.UserRepository) private userRepository: UserRepository,
   ) {}
 
-  async isAuthenticated(bearerToken: string | undefined) {
+  async getUserByToken(bearerToken: string | undefined) {
     const [bearer, token] = (bearerToken || '').split(' ');
 
     this.isDefined(bearer);

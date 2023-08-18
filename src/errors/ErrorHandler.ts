@@ -8,7 +8,7 @@ export const errorHandler = (error: ErrorTypes, req: Request, res: Response, nex
   const code = getCode(error);
   const message = getMessage(error);
 
-  res.status(code).send({ code, message });
+  res.status(code).json({ code, message });
 };
 
 function getMessage(error: any) {
