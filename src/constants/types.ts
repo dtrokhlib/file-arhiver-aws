@@ -4,19 +4,22 @@ export const TYPE = {
   UserRepository: Symbol.for('UserRepository'),
   StorageRepository: Symbol.for('StorageRepository'),
   RoleRepository: Symbol.for('RoleRepository'),
+  PermissionRepository: Symbol.for('PermissionRepository'),
   ConfigService: Symbol.for('ConfigService'),
   StorageService: Symbol.for('StorageService'),
   UserService: Symbol.for('UserService'),
   RolesService: Symbol.for('RolesService'),
+  PermissionService: Symbol.for('PermissionService'),
   QueryBuilder: Symbol.for('QueryBuilder'),
   AuthenticationService: Symbol.for('AuthenticationService'),
-  RoutesProtector: Symbol.for('RoutesProtector'),
+  AuthMiddlewares: Symbol.for('AuthMiddlewares'),
 };
 
 export const ENTITIES = {
   User: Symbol.for('User'),
   Storage: Symbol.for('Storage'),
   Role: Symbol.for('Role'),
+  Permission: Symbol.for('Permission'),
 };
 
 export const EXCLUDED_FIELDS = {

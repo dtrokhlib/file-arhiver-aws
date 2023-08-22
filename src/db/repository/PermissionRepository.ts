@@ -4,19 +4,18 @@ import { ENTITIES, TYPE } from '../../constants/types';
 import { DatabaseConnector } from '../connector';
 import { QueryBuilder } from '../utils/QueryBuilder';
 import { IQueryFilters, IQuerySearch } from '../../interfaces/api/IQuery';
-import { UploadFileDto } from '../../models/UploadFileDto';
 
 @injectable()
-export class StorageRepository extends Repository {
+export class PermissionRepository extends Repository {
   constructor(
     @inject(TYPE.DatabaseConnector) dbConnector: DatabaseConnector,
     @inject(TYPE.QueryBuilder) queryBuilder: QueryBuilder,
-    @inject(ENTITIES.Storage) tableName: string,
+    @inject(ENTITIES.Permission) tableName: string,
   ) {
     super(dbConnector, queryBuilder, { tableName });
   }
 
-  async create(payload: UploadFileDto) {
+  async create(payload: any) {
     return super.create(payload);
   }
 
@@ -24,8 +23,8 @@ export class StorageRepository extends Repository {
     return super.delete(id);
   }
 
-  update(id: string, file: UploadFileDto) {
-    return super.update(id, file);
+  update(id: string, payload: any) {
+    return super.update(id, payload);
   }
 
   getList(filters: IQueryFilters, search: IQuerySearch) {

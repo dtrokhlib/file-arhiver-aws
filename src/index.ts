@@ -8,11 +8,12 @@ import { errorHandler } from './errors/ErrorHandler';
 import { bindings } from './inversify.config';
 import { ConfigService } from './config';
 import { IRequest } from './interfaces/api/IRequest';
+import { addUserToRequest } from './api/v1/middlewares/AddUserToRequest';
 
 import './api/v1/controllers/StorageController';
 import './api/v1/controllers/UserController';
 import './api/v1/controllers/AuthenticationController';
-import { addUserToRequest } from './api/v1/middlewares/AddUserToRequest';
+import './api/v1/controllers/PermissionController';
 
 class Server {
   private readonly app: Application;
@@ -28,7 +29,6 @@ class Server {
 
     this.container = new Container();
     this.container.load(buildProviderModule());
-    this.setupMiddleware();
     this.container.loadAsync(bindings);
 
     this.server = new InversifyExpressServer(this.container);
@@ -53,10 +53,8 @@ class Server {
       next();
     });
     app.use(morgan('[:date[clf]] :method :url :status :res[content-length] - :response-time ms'));
-  }
 
-  setupMiddleware() {
-    this.app.use(addUserToRequest);
+    app.use(addUserToRequest);
   }
 
   setupErrorHandler() {

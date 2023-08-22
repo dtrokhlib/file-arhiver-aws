@@ -7,16 +7,16 @@ import { StorageService } from '../../../services/StorageService';
 import { BaseController } from './BaseController';
 import { IQuery } from '../../../interfaces/api/IQuery';
 import { IFile } from '../../../interfaces/api/IFile';
-import { AuthProtect } from '../middlewares/AuthProtect';
+import { Protect } from '../middlewares/Protect';
 import { IRequest } from '../../../interfaces/api/IRequest';
 
-@controller('/api/v1/storage')
+@controller('/api/v1/storage', Protect)
 export class StorageController extends BaseController {
   constructor(@inject(TYPE.StorageService) private service: StorageService) {
     super();
   }
 
-  @httpGet('/', AuthProtect)
+  @httpGet('/')
   async list(req: IRequest, res: Response, next: NextFunction) {
     try {
       const queries = { ...req.query, is_deleted: false, userid: req.user.id } as IQuery;
@@ -29,7 +29,7 @@ export class StorageController extends BaseController {
     }
   }
 
-  @httpGet('/:id/get-signed-url', AuthProtect)
+  @httpGet('/:id/get-signed-url')
   async getSignedUrl(req: IRequest, res: Response, next: NextFunction) {
     try {
       const url = await this.service.getSignedUrl(req.user.id, req.params.id);
@@ -39,7 +39,7 @@ export class StorageController extends BaseController {
     }
   }
 
-  @httpGet('/:id', AuthProtect)
+  @httpGet('/:id')
   async getById(req: IRequest, res: Response, next: NextFunction) {
     try {
       const file = await this.service.getById(req.params.id);
@@ -49,7 +49,7 @@ export class StorageController extends BaseController {
     }
   }
 
-  @httpPost('/', AuthProtect, upload.single('file'))
+  @httpPost('/', upload.single('file'))
   async create(req: IRequest, res: Response, next: NextFunction) {
     try {
       this.isFileProvided(req);
@@ -60,7 +60,7 @@ export class StorageController extends BaseController {
     }
   }
 
-  @httpPut('/:id', AuthProtect, upload.single('file'))
+  @httpPut('/:id', upload.single('file'))
   async update(req: IRequest, res: Response, next: NextFunction) {
     try {
       this.isFileProvided(req);
@@ -71,7 +71,7 @@ export class StorageController extends BaseController {
     }
   }
 
-  @httpDelete('/:id', AuthProtect)
+  @httpDelete('/:id')
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
       await this.service.delete(req.params.id);

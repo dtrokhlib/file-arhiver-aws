@@ -1,35 +1,23 @@
 import { inject, injectable } from 'inversify';
 import { TYPE } from '../../constants/types';
 import { UserRepository } from '../../db/repository/UserRepository';
-import { HttpError } from '../../errors/types/HttpError';
 import { AuthenticationService } from './AuthenticationService';
 
-const MESSAGE = {
-  headerError: 'Authorization header was not provided or not valid',
-};
-
 @injectable()
-export class RoutesProtector {
+export class AuthMiddlewares {
   constructor(
     @inject(TYPE.AuthenticationService) private authService: AuthenticationService,
     @inject(TYPE.UserRepository) private userRepository: UserRepository,
   ) {}
 
   async getUserByToken(bearerToken: string | undefined) {
-    const [bearer, token] = (bearerToken || '').split(' ');
+    const token = (bearerToken || '').split(' ')[1];
+    const { email }: any = await this.authService.decodeToken(token).catch(null);
 
-    this.isDefined(bearer);
-    this.isDefined(token);
-
-    const { email }: any = await this.authService.decodeToken(token);
-    this.isDefined(email);
+    if (!email) {
+      return null;
+    }
 
     return this.userRepository.findOneByParams({ email });
-  }
-
-  private isDefined(value: string | undefined) {
-    if (!value) {
-      throw new HttpError(MESSAGE.headerError, 401);
-    }
   }
 }

@@ -8,9 +8,11 @@ import { StorageConnector } from './connectors/StorageConnector';
 import { StorageService } from './services/StorageService';
 import { StorageRepository } from './db/repository/StorageRepository';
 import { AuthenticationService } from './services/auth/AuthenticationService';
-import { RoutesProtector } from './services/auth/RoutesProtector';
+import { AuthMiddlewares } from './services/auth/AuthMiddlewares';
 import { UserService } from './services/UserService';
 import { RolesRepository } from './db/repository/RolesRepository';
+import { PermissionRepository } from './db/repository/PermissionRepository';
+import { PermissionService } from './services/PermissionService';
 
 export const bindings = new AsyncContainerModule(async bind => {
   bind<DatabaseConnector>(TYPE.DatabaseConnector).to(DatabaseConnector).inSingletonScope();
@@ -20,12 +22,14 @@ export const bindings = new AsyncContainerModule(async bind => {
   bind<UserService>(TYPE.UserService).to(UserService);
   bind<StorageService>(TYPE.StorageService).to(StorageService);
   bind<AuthenticationService>(TYPE.AuthenticationService).to(AuthenticationService);
+  bind<PermissionService>(TYPE.PermissionService).to(PermissionService);
 
-  bind<RoutesProtector>(TYPE.RoutesProtector).to(RoutesProtector);
+  bind<AuthMiddlewares>(TYPE.AuthMiddlewares).to(AuthMiddlewares);
 
   bind<UserRepository>(TYPE.UserRepository).to(UserRepository);
   bind<StorageRepository>(TYPE.StorageRepository).to(StorageRepository);
   bind<RolesRepository>(TYPE.RoleRepository).to(RolesRepository);
+  bind<PermissionRepository>(TYPE.PermissionRepository).to(PermissionRepository);
 
   bind<QueryBuilder>(TYPE.QueryBuilder).to(QueryBuilder);
 

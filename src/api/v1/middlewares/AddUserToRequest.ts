@@ -1,14 +1,14 @@
 import { NextFunction, Response } from 'express';
 import { TYPE } from '../../../constants/types';
 import { IRequest } from '../../../interfaces/api/IRequest';
-import { RoutesProtector } from '../../../services/auth/RoutesProtector';
+import { AuthMiddlewares } from '../../../services/auth/AuthMiddlewares';
 
 export const addUserToRequest = async (req: IRequest, res: Response, next: NextFunction) => {
   try {
-    const protector = req.container?.get<RoutesProtector>(TYPE.RoutesProtector);
-    req.user = await protector?.getUserByToken(req.headers.authorization);
+    const authMiddlewares = req.container?.get<AuthMiddlewares>(TYPE.AuthMiddlewares);
+    req.user = await authMiddlewares?.getUserByToken(req.headers.authorization);
     next();
   } catch (error) {
-    next(error);
+    next();
   }
 };

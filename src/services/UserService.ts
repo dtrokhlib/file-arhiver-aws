@@ -5,13 +5,16 @@ import { UserRepository } from '../db/repository/UserRepository';
 import { CreateUserDto } from '../models/CreateUserDto';
 import { IQueryFilters, IQuerySearch } from '../interfaces/api/IQuery';
 import { ConfigService } from '../config';
+import { BaseService } from './BaseService';
 
 @injectable()
-export class UserService {
+export class UserService extends BaseService {
   constructor(
     @inject(TYPE.ConfigService) private readonly config: ConfigService,
     @inject(TYPE.UserRepository) private readonly repository: UserRepository,
-  ) {}
+  ) {
+    super();
+  }
 
   async create(user: CreateUserDto) {
     const preparedData = await this.prepareUserData(user);

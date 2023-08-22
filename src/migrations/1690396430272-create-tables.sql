@@ -12,11 +12,30 @@ CREATE TABLE users(
 
 CREATE TABLE files(
   id SERIAL PRIMARY KEY,
-  sid VARCHAR(100) UNIQUE NOT NULL,
   name VARCHAR(100) NOT NULL,
+  sid VARCHAR(100) UNIQUE NOT NULL,
   filename VARCHAR(100) NOT NULL,
   extension VARCHAR(10) NOT NULL,
   is_deleted BOOLEAN DEFAULT false,
-  userId INTEGER NOT NULL,
-  FOREIGN KEY (userId) REFERENCES users (id)
+  user_id INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE roles(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  is_deleted BOOLEAN DEFAULT false
+);
+
+CREATE TABLE permissions(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  list jsonb,
+  is_deleted BOOLEAN DEFAULT false
+);
+
+CREATE TABLE roles_permissions (
+  roles_id int REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  permissions_id int REFERENCES permissions (id) ON UPDATE CASCADE,
+  CONSTRAINT roles_permissions_pkey PRIMARY KEY (roles_id, permissions_id)
 );

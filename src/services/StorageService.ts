@@ -9,6 +9,7 @@ import { HttpError } from '../errors/types/HttpError';
 import { IQueryFilters, IQuerySearch } from '../interfaces/api/IQuery';
 import { BaseService } from './BaseService';
 import { UserRepository } from '../db/repository/UserRepository';
+import { FileEntity } from '../models/entity/Entity';
 
 @injectable()
 export class StorageService extends BaseService {
@@ -37,10 +38,10 @@ export class StorageService extends BaseService {
 
   async uploadFile(userId: string, file: IFile) {
     try {
-      const payload = this.preparePayloadForFile(userId, file);
-      await this.verifyFileUploader(payload.userId);
+      const payload = await this.preparePayloadForFile(userId, file);
       const createdFile = await this.storageRepository.create(payload);
       await this.connector.uploadFile(payload.sid, file.path);
+
       return createdFile;
     } finally {
       await fs.unlink(file.path).catch(this.unlinkErrorHandler);
@@ -49,9 +50,10 @@ export class StorageService extends BaseService {
 
   async updateFile(fileId: string, userId: string, file: IFile) {
     try {
-      const payload = this.preparePayloadForFile(userId, file);
+      const payload = await this.preparePayloadForFile(userId, file);
       const createdFile = await this.storageRepository.update(fileId, payload);
       await this.connector.uploadFile(payload.sid, file.path);
+
       return createdFile;
     } finally {
       await fs.unlink(file.path).catch(this.unlinkErrorHandler);
@@ -68,14 +70,19 @@ export class StorageService extends BaseService {
     return { sid: file.sid, signedUrl };
   }
 
-  private preparePayloadForFile(userId: string, file: IFile) {
-    return {
+  private async preparePayloadForFile(userId: string, file: IFile) {
+    const payload = {
       sid: uuidv4(),
       name: file.originalname,
       filename: file.filename,
       extension: file.mimetype,
       userId,
     };
+
+    await FileEntity.validatePayload(payload);
+    await this.verifyFileUploader(payload.userId);
+
+    return payload;
   }
 
   async verifyFileUploader(userId: string) {
