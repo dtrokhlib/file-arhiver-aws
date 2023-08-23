@@ -1,39 +1,23 @@
 import { inject, injectable } from 'inversify';
 import { TYPE } from '../constants/types';
 import { IQueryFilters, IQuerySearch } from '../interfaces/api/IQuery';
-import { ConfigService } from '../config';
 import { BaseService } from './BaseService';
 import { PermissionRepository } from '../db/repository/PermissionRepository';
-
-enum Entity {
-  FILE = 'file',
-  USER = 'user',
-  ROLES = 'roles',
-  PERMISSION = 'permission',
-}
-enum Action {
-  READ = 'read',
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  READ_ALL = 'read_all',
-  CREATE_ALL = 'create_all',
-  UPDATE_ALL = 'update_all',
-  DELETE_ALL = 'delete_all',
-}
+import { PermissionEntity } from '../db/entities/PermissionEntity';
+import { EntityAction, EntityType } from '../constants/enums/entity';
+import { IPayload } from '../interfaces/api/IPayload';
 
 @injectable()
 export class PermissionService extends BaseService {
-  constructor(
-    @inject(TYPE.ConfigService) private readonly config: ConfigService,
-    @inject(TYPE.UserRepository) private readonly repository: PermissionRepository,
-  ) {
+  constructor(@inject(TYPE.UserRepository) private readonly repository: PermissionRepository) {
     super();
   }
 
-  async create(permission: any) {
-    const preparedData = await this.prepareAndValidatePayload(permission);
-    return this.repository.create(preparedData);
+  async create(permission: IPayload) {
+    // const preparedData = await this.prepareAndValidatePayload(permission);
+    const entity = new PermissionEntity(permission);
+    return entity;
+    // return this.repository.create(preparedData);
   }
 
   delete(id: string) {
@@ -68,8 +52,8 @@ export class PermissionService extends BaseService {
     const keys = Object.keys(permissionList);
     return keys.every(
       (key: any) =>
-        Object.values(Entity).includes(key) &&
-        permissionList[key].every((action: any) => Object.values(Action).includes(action)),
+        Object.values(EntityType).includes(key) &&
+        permissionList[key].every((action: any) => Object.values(EntityAction).includes(action)),
     );
   }
 }

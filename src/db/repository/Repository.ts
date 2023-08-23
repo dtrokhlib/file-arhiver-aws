@@ -62,11 +62,11 @@ export class Repository {
     return record;
   }
 
-  executeQuery(queryString: string, payload?: any): Promise<any> {
+  private executeQuery(queryString: string, payload?: any): Promise<any> {
     return this.runQueryWithArgs(queryString, payload).then(res => res.rows);
   }
 
-  runQueryWithArgs(queryString: string, payload: any) {
+  private runQueryWithArgs(queryString: string, payload: any) {
     if (payload) {
       return this.connection.query(queryString, Object.values(payload));
     }
@@ -90,7 +90,7 @@ export class Repository {
     }
   }
 
-  protected buildQueryOptions(type: QueryType, params: IQueryRawOptions): IQueryOptions {
+  private buildQueryOptions(type: QueryType, params: IQueryRawOptions): IQueryOptions {
     return {
       table: this.entityConfig.tableName,
       excludeReturnFields: this.entityConfig.excludeReturnFields,
