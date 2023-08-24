@@ -27,14 +27,7 @@ export class PermissionEntity extends Entity {
       throw new HttpError(ERROR_MSG.MISSED_PARAMETER, 400);
     }
 
-    const keys = Object.keys(list);
-    const isValid = keys.every(
-      (key: any) =>
-        Object.values(EntityType).includes(key) &&
-        list[key].every((action: any) => Object.values(EntityAction).includes(action)),
-    );
-
-    if (!isValid) {
+    if (!this.isValidPermissionStructure(list)) {
       throw new HttpError(ERROR_MSG.NOT_VALID_STRUCTURE, 400);
     }
   }
@@ -45,13 +38,7 @@ export class PermissionEntity extends Entity {
     };
   }
 
-  private isValidPermission(payload: any) {
-    const { name, list } = payload || {};
-
-    if (!name || !list) {
-      return false;
-    }
-
+  private isValidPermissionStructure(list: any) {
     const keys = Object.keys(list);
     return keys.every(
       (key: any) =>

@@ -12,7 +12,9 @@ import { AuthMiddlewares } from './services/auth/AuthMiddlewares';
 import { UserService } from './services/UserService';
 import { RolesRepository } from './db/repository/RolesRepository';
 import { PermissionRepository } from './db/repository/PermissionRepository';
+import { RolesPermissionRepository } from './db/repository/RolesPermissionRepository.ts'
 import { PermissionService } from './services/PermissionService';
+import { RolesService } from './services/RolesService';
 
 export const bindings = new AsyncContainerModule(async bind => {
   bind<DatabaseConnector>(TYPE.DatabaseConnector).to(DatabaseConnector).inSingletonScope();
@@ -23,6 +25,7 @@ export const bindings = new AsyncContainerModule(async bind => {
   bind<StorageService>(TYPE.StorageService).to(StorageService);
   bind<AuthenticationService>(TYPE.AuthenticationService).to(AuthenticationService);
   bind<PermissionService>(TYPE.PermissionService).to(PermissionService);
+  bind<RolesService>(TYPE.RolesService).to(RolesService);
 
   bind<AuthMiddlewares>(TYPE.AuthMiddlewares).to(AuthMiddlewares);
 
@@ -30,12 +33,14 @@ export const bindings = new AsyncContainerModule(async bind => {
   bind<StorageRepository>(TYPE.StorageRepository).to(StorageRepository);
   bind<RolesRepository>(TYPE.RoleRepository).to(RolesRepository);
   bind<PermissionRepository>(TYPE.PermissionRepository).to(PermissionRepository);
+  bind<RolesPermissionRepository>(TYPE.RolesPermissionRepository).to(RolesPermissionRepository);
 
   bind<QueryBuilder>(TYPE.QueryBuilder).to(QueryBuilder);
 
   bind<string>(ENTITIES.User).toConstantValue('users');
   bind<string>(ENTITIES.Storage).toConstantValue('files');
   bind<string>(ENTITIES.Role).toConstantValue('roles');
+  bind<string>(ENTITIES.Permission).toConstantValue('permissions');
 
   bind<string[]>(EXCLUDED_FIELDS.User).toConstantValue([]);
 });

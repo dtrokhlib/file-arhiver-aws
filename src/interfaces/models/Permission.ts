@@ -5,6 +5,8 @@ export type ListItem = {
 };
 
 export interface IPermission {
+  id?: number;
   name: string;
   list: ListItem[];
+  is_deleted?: boolean;
 }

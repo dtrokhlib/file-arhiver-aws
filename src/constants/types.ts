@@ -5,6 +5,7 @@ export const TYPE = {
   StorageRepository: Symbol.for('StorageRepository'),
   RoleRepository: Symbol.for('RoleRepository'),
   PermissionRepository: Symbol.for('PermissionRepository'),
+  RolesPermissionRepository: Symbol.for('RolesPermissionRepository'),
   ConfigService: Symbol.for('ConfigService'),
   StorageService: Symbol.for('StorageService'),
   UserService: Symbol.for('UserService'),
@@ -20,6 +21,7 @@ export const ENTITIES = {
   Storage: Symbol.for('Storage'),
   Role: Symbol.for('Role'),
   Permission: Symbol.for('Permission'),
+  RolesPermission: Symbol.for('RolesPermission'),
 };
 
 export const EXCLUDED_FIELDS = {

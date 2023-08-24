@@ -4,20 +4,17 @@ import { IQueryFilters, IQuerySearch } from '../interfaces/api/IQuery';
 import { BaseService } from './BaseService';
 import { PermissionRepository } from '../db/repository/PermissionRepository';
 import { PermissionEntity } from '../db/entities/PermissionEntity';
-import { EntityAction, EntityType } from '../constants/enums/entity';
 import { IPayload } from '../interfaces/api/IPayload';
 
 @injectable()
 export class PermissionService extends BaseService {
-  constructor(@inject(TYPE.UserRepository) private readonly repository: PermissionRepository) {
+  constructor(@inject(TYPE.PermissionRepository) private readonly repository: PermissionRepository) {
     super();
   }
 
   async create(permission: IPayload) {
-    // const preparedData = await this.prepareAndValidatePayload(permission);
-    const entity = new PermissionEntity(permission);
-    return entity;
-    // return this.repository.create(preparedData);
+    const obj = new PermissionEntity(permission).toObject();
+    return this.repository.create(obj);
   }
 
   delete(id: string) {
@@ -25,8 +22,7 @@ export class PermissionService extends BaseService {
   }
 
   async update(id: string, permission: any) {
-    const preparedData = await this.prepareAndValidatePayload(permission);
-    return this.repository.update(id, preparedData);
+    return this.repository.update(id, permission);
   }
 
   getList(filters: IQueryFilters, search: IQuerySearch) {
@@ -39,21 +35,5 @@ export class PermissionService extends BaseService {
 
   findOneByParams(search: IQuerySearch) {
     return this.repository.findOneByParams(search);
-  }
-
-  private async prepareAndValidatePayload(permission: any) {
-    console.log(permission);
-    console.log(this.isValidPermission(permission.list));
-
-    return permission;
-  }
-
-  isValidPermission(permissionList: any) {
-    const keys = Object.keys(permissionList);
-    return keys.every(
-      (key: any) =>
-        Object.values(EntityType).includes(key) &&
-        permissionList[key].every((action: any) => Object.values(EntityAction).includes(action)),
-    );
   }
 }

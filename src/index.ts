@@ -14,6 +14,7 @@ import './api/v1/controllers/StorageController';
 import './api/v1/controllers/UserController';
 import './api/v1/controllers/AuthenticationController';
 import './api/v1/controllers/PermissionController';
+import './api/v1/controllers/RolesController';
 
 class Server {
   private readonly app: Application;

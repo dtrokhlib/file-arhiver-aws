@@ -50,11 +50,13 @@ export class Repository {
     return updatedRecord;
   }
 
-  async delete(id: string) {
+  async delete(id: string, permanently = false) {
+    const queryType = permanently ? QueryType.DELETE : QueryType.UPDATE;
     const payload = await this.prepareDeletionPayload(id);
-    const queryOptions = this.buildQueryOptions(QueryType.DELETE, { search: { id }, payload });
+    const queryOptions = this.buildQueryOptions(queryType, { search: { id }, payload });
     const queryString = this.queryBuilder.buildQuery(queryOptions);
-    return this.executeQuery(queryString, payload);
+
+    return permanently ? this.executeQuery(queryString) : this.executeQuery(queryString, payload);
   }
 
   async findOneByParams(search: IQuerySearch) {
