@@ -12,7 +12,7 @@ import { AuthMiddlewares } from './services/auth/AuthMiddlewares';
 import { UserService } from './services/UserService';
 import { RolesRepository } from './db/repository/RolesRepository';
 import { PermissionRepository } from './db/repository/PermissionRepository';
-import { RolesPermissionRepository } from './db/repository/RolesPermissionRepository.ts'
+import { RolesPermissionRepository } from './db/repository/RolesPermissionRepository';
 import { PermissionService } from './services/PermissionService';
 import { RolesService } from './services/RolesService';
 
@@ -41,6 +41,7 @@ export const bindings = new AsyncContainerModule(async bind => {
   bind<string>(ENTITIES.Storage).toConstantValue('files');
   bind<string>(ENTITIES.Role).toConstantValue('roles');
   bind<string>(ENTITIES.Permission).toConstantValue('permissions');
+  bind<string>(ENTITIES.RolesPermission).toConstantValue('roles_permissions');
 
   bind<string[]>(EXCLUDED_FIELDS.User).toConstantValue([]);
 });

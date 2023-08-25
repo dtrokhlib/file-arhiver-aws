@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { OrderType } from '../../interfaces/db/OrderType';
 import { IQueryFilters, IQuerySearch } from '../../interfaces/api/IQuery';
-import { IQueryOptions } from '../../interfaces/db/QueryOptions';
+import { IJoin, IQueryOptions } from '../../interfaces/db/QueryOptions';
 import { QueryType } from '../../interfaces/db/QueryType';
 
 @injectable()
@@ -21,7 +21,7 @@ export class QueryBuilder {
 
   private createSelectQuery(options: IQueryOptions) {
     const { table } = options;
-    const query = this.assignFiltersAndSearch(`SELECT * FROM ${table}`, options);
+    const query = this.assignFiltersAndSearch(`SELECT * FROM ${table} ${this.processJoin(options.join)}`, options);
     return query;
   }
 
@@ -118,5 +118,15 @@ export class QueryBuilder {
     });
 
     return searchQueries.length ? `WHERE ${searchQueries.join(' AND ')}` : '';
+  }
+
+  private processJoin(join: IJoin | undefined) {
+    const { type, tableToJoin, joinField, originField } = join || {};
+
+    if (type && tableToJoin && joinField && originField) {
+      return ` ${type} JOIN ${tableToJoin} ON ${originField} = ${joinField} `;
+    }
+
+    return ' ';
   }
 }

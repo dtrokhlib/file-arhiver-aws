@@ -64,11 +64,11 @@ export class Repository {
     return record;
   }
 
-  private executeQuery(queryString: string, payload?: any): Promise<any> {
+  protected executeQuery(queryString: string, payload?: any): Promise<any> {
     return this.runQueryWithArgs(queryString, payload).then(res => res.rows);
   }
 
-  private runQueryWithArgs(queryString: string, payload: any) {
+  protected runQueryWithArgs(queryString: string, payload: any) {
     if (payload) {
       return this.connection.query(queryString, Object.values(payload));
     }
@@ -86,13 +86,13 @@ export class Repository {
     return payload;
   }
 
-  private verifyRecordExisting(id: string, dbRecord: any) {
+  protected verifyRecordExisting(id: string, dbRecord: any) {
     if (!dbRecord) {
       throw new HttpError(`Record with ID {${id}} in ${this.entityConfig.tableName} table, not found.`, 404);
     }
   }
 
-  private buildQueryOptions(type: QueryType, params: IQueryRawOptions): IQueryOptions {
+  protected buildQueryOptions(type: QueryType, params: IQueryRawOptions): IQueryOptions {
     return {
       table: this.entityConfig.tableName,
       excludeReturnFields: this.entityConfig.excludeReturnFields,

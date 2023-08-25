@@ -11,8 +11,20 @@ export interface IQueryRawOptions {
   payload?: any;
 }
 
+export enum JoinType {
+  INNER = 'INNER',
+}
+
+export interface IJoin {
+  type: JoinType;
+  tableToJoin: string;
+  joinField: string;
+  originField: string;
+}
+
 export interface IQueryOptions extends IQueryRawOptions {
   table: string;
   type: QueryType;
   excludeReturnFields?: string[];
+  join?: IJoin;
 }

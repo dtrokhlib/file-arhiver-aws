@@ -48,8 +48,8 @@ export class RolesController extends BaseController {
   @httpPut('/:id')
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await this.service.update(req.params.id, req.body);
-      res.json(user);
+      const role = await this.service.update(req.params.id, req.body);
+      res.json(role);
     } catch (error) {
       next(error);
     }
@@ -60,6 +60,26 @@ export class RolesController extends BaseController {
     try {
       await this.service.delete(req.params.id);
       res.status(204).json();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @httpPost('/:id/add-permissions')
+  async assignPermissions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const role = await this.service.addPermission(req.params.id, req.body);
+      res.send(role);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @httpGet('/:id/get-permissions')
+  async getPermissions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const role = await this.service.getPermissions(req.params.id);
+      res.send(role);
     } catch (error) {
       next(error);
     }
